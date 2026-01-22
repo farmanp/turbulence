@@ -210,6 +210,57 @@ class HTMLReportGenerator:
                     records.append(json.loads(line))
         return records
 
+    def _load_from_sqlite(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+        """Load all records from SQLite database.
+
+        Returns:
+            Tuple of (instances, steps, assertions).
+        """
+        db_path = self.run_path / "turbulence.db"
+        if not db_path.exists():
+            return [], [], []
+
+        import sqlite3
+
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        
+        try:
+            # Load instances
+            instances = []
+            cursor = conn.execute("SELECT * FROM instances")
+            for row in cursor:
+                inst = dict(row)
+                inst["instance_id"] = inst.pop("id")
+                inst["passed"] = inst["status"] == "pass"
+                if inst.get("entry_data"):
+                    inst["entry_data"] = json.loads(inst["entry_data"])
+                instances.append(inst)
+
+            # Load steps
+            steps = []
+            cursor = conn.execute("SELECT * FROM steps")
+            for row in cursor:
+                step = dict(row)
+                if step.get("observation"):
+                    step["observation"] = json.loads(step["observation"])
+                steps.append(step)
+
+            # Load assertions
+            assertions = []
+            cursor = conn.execute("SELECT * FROM assertions")
+            for row in cursor:
+                assertion = dict(row)
+                if assertion.get("expected"):
+                    assertion["expected"] = json.loads(assertion["expected"])
+                if assertion.get("actual"):
+                    assertion["actual"] = json.loads(assertion["actual"])
+                assertions.append(assertion)
+
+            return instances, steps, assertions
+        finally:
+            conn.close()
+
     def _collect_report_data(self) -> ReportData:
         """Collect and aggregate all data needed for the report.
 
@@ -218,9 +269,14 @@ class HTMLReportGenerator:
         """
         manifest = self._load_manifest()
         summary = self._load_summary()
-        instances = self._load_jsonl("instances.jsonl")
-        steps = self._load_jsonl("steps.jsonl")
-        assertions = self._load_jsonl("assertions.jsonl")
+
+        db_path = self.run_path / "turbulence.db"
+        if db_path.exists():
+            instances, steps, assertions = self._load_from_sqlite()
+        else:
+            instances = self._load_jsonl("instances.jsonl")
+            steps = self._load_jsonl("steps.jsonl")
+            assertions = self._load_jsonl("assertions.jsonl")
 
         # Initialize report data
         report_data = ReportData(

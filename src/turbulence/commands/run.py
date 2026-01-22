@@ -97,6 +97,11 @@ def run(
         "--fail-on",
         help="Fail pipeline if threshold exceeded (e.g. 'pass_rate<99', 'p95_latency_ms>500')",
     ),
+    storage: str = typer.Option(
+        "jsonl",
+        "--storage",
+        help="Storage backend to use for artifacts ('jsonl' or 'sqlite')",
+    ),
 ) -> None:
     """Execute workflow simulations against the system under test.
 
@@ -117,6 +122,7 @@ def run(
             profile=profile,
             output_dir=output_dir,
             fail_on=fail_on,
+            storage=storage,
         )
     )
     raise typer.Exit(code=exit_code)
@@ -132,6 +138,7 @@ async def _run_instances(
     profile: str | None,
     output_dir: Path,
     fail_on: list[str] | None,
+    storage: str = "jsonl",
 ) -> int:
     # Parse thresholds early to fail fast
     thresholds: list[Threshold] = []
@@ -168,6 +175,7 @@ async def _run_instances(
         scenario_ids=[scenario.id for scenario in scenario_list],
         seed=seed_value,
         config=run_config,
+        storage_type=storage,
     ).initialize()
 
     template_engine = TemplateEngine()

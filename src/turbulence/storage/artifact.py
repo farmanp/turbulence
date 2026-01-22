@@ -16,22 +16,20 @@ from turbulence.models.manifest import (
     StepRecord,
 )
 from turbulence.models.observation import Observation
+from turbulence.storage.base import StorageWriter
 from turbulence.storage.jsonl import JSONLWriter
+from turbulence.storage import create_storage_writer
 from turbulence.utils.stats import calculate_percentile
 
 
 class ArtifactStore:
     """Manages artifact storage for a single test run.
 
+    Delegates actual writing to a storage backend (JSONL or SQLite).
     Creates a directory structure under runs/<run_id>/ containing:
     - manifest.json: Run metadata and configuration
-    - instances.jsonl: One line per instance execution
-    - steps.jsonl: One line per step observation
-    - assertions.jsonl: One line per assertion result
     - summary.json: Final aggregated statistics
     - artifacts/: Per-instance raw data (optional)
-
-    All JSONL files are written with immediate flush for durability.
     """
 
     def __init__(
@@ -42,6 +40,7 @@ class ArtifactStore:
         scenario_ids: list[str] | None = None,
         seed: int | None = None,
         config: RunConfig | None = None,
+        storage_type: str = "jsonl",
     ) -> None:
         """Initialize the artifact store for a run.
 
@@ -52,6 +51,7 @@ class ArtifactStore:
             scenario_ids: List of scenario IDs being executed.
             seed: Random seed for reproducibility.
             config: Run configuration snapshot.
+            storage_type: Type of storage backend ('jsonl' or 'sqlite').
         """
         self._run_id = run_id
         self._base_path = base_path or Path("runs")
@@ -60,19 +60,15 @@ class ArtifactStore:
         self._scenario_ids = scenario_ids or []
         self._seed = seed
         self._config = config or RunConfig()
+        self._storage_type = storage_type
 
         # File paths
         self._manifest_path = self._run_path / "manifest.json"
-        self._instances_path = self._run_path / "instances.jsonl"
-        self._steps_path = self._run_path / "steps.jsonl"
-        self._assertions_path = self._run_path / "assertions.jsonl"
         self._summary_path = self._run_path / "summary.json"
         self._artifacts_path = self._run_path / "artifacts"
 
-        # JSONL writers (opened lazily)
-        self._instances_writer: JSONLWriter | None = None
-        self._steps_writer: JSONLWriter | None = None
-        self._assertions_writer: JSONLWriter | None = None
+        # Storage backend
+        self._storage = create_storage_writer(storage_type)
 
         # Tracking for summary
         self._started_at: datetime | None = None
@@ -105,18 +101,18 @@ class ArtifactStore:
 
     @property
     def instances_path(self) -> Path:
-        """Return the path to instances.jsonl."""
-        return self._instances_path
+        """Return the path to instances.jsonl (valid when using JSONL storage)."""
+        return self._run_path / "instances.jsonl"
 
     @property
     def steps_path(self) -> Path:
-        """Return the path to steps.jsonl."""
-        return self._steps_path
+        """Return the path to steps.jsonl (valid when using JSONL storage)."""
+        return self._run_path / "steps.jsonl"
 
     @property
     def assertions_path(self) -> Path:
-        """Return the path to assertions.jsonl."""
-        return self._assertions_path
+        """Return the path to assertions.jsonl (valid when using JSONL storage)."""
+        return self._run_path / "assertions.jsonl"
 
     @property
     def summary_path(self) -> Path:
@@ -131,7 +127,7 @@ class ArtifactStore:
     def initialize(self) -> "ArtifactStore":
         """Initialize the run directory and write the manifest.
 
-        Creates the directory structure and writes manifest.json.
+        Creates the directory structure and initializes the storage backend.
         Must be called before writing any artifacts.
 
         Returns:
@@ -147,7 +143,7 @@ class ArtifactStore:
         # Record start time
         self._started_at = datetime.now(timezone.utc)
 
-        # Write manifest
+        # Create manifest
         manifest = RunManifest(
             run_id=self._run_id,
             timestamp=self._started_at,
@@ -156,13 +152,9 @@ class ArtifactStore:
             seed=self._seed,
             config=self._config,
         )
-        with self._manifest_path.open("w", encoding="utf-8") as f:
-            f.write(manifest.model_dump_json(indent=2))
 
-        # Open JSONL writers
-        self._instances_writer = JSONLWriter(self._instances_path).open()
-        self._steps_writer = JSONLWriter(self._steps_path).open()
-        self._assertions_writer = JSONLWriter(self._assertions_path).open()
+        # Initialize storage backend
+        self._storage.initialize(self._run_path, manifest)
 
         self._is_initialized = True
         return self
@@ -208,8 +200,7 @@ class ArtifactStore:
         )
 
         with self._write_lock:
-            if self._instances_writer is not None:
-                self._instances_writer.write(record)
+            self._storage.write_instance(record)
 
             # Update tracking
             self._total_instances += 1
@@ -264,8 +255,7 @@ class ArtifactStore:
         )
 
         with self._write_lock:
-            if self._steps_writer is not None:
-                self._steps_writer.write(record)
+            self._storage.write_step(record)
 
             self._total_steps += 1
 
@@ -321,8 +311,7 @@ class ArtifactStore:
         )
 
         with self._write_lock:
-            if self._assertions_writer is not None:
-                self._assertions_writer.write(record)
+            self._storage.write_assertion(record)
 
             # Update tracking
             self._total_assertions += 1
@@ -366,25 +355,15 @@ class ArtifactStore:
     def finalize(self) -> RunSummary:
         """Finalize the run and write summary.json.
 
-        Closes all JSONL writers and writes the final summary.
+        Closes the storage backend and writes the final summary.
 
         Returns:
             The generated RunSummary.
         """
         self._ensure_initialized()
 
-        # Close JSONL writers
-        if self._instances_writer is not None:
-            self._instances_writer.close()
-            self._instances_writer = None
-
-        if self._steps_writer is not None:
-            self._steps_writer.close()
-            self._steps_writer = None
-
-        if self._assertions_writer is not None:
-            self._assertions_writer.close()
-            self._assertions_writer = None
+        # Close storage backend
+        self._storage.close()
 
         # Calculate duration
         completed_at = datetime.now(timezone.utc)

@@ -7,6 +7,14 @@ from typing import IO, Any
 from pydantic import BaseModel
 
 
+from turbulence.models.manifest import (
+    AssertionRecord,
+    InstanceRecord,
+    RunManifest,
+    StepRecord,
+)
+
+
 class JSONLWriter:
     """Writer for JSONL (JSON Lines) format files.
 
@@ -78,6 +86,59 @@ class JSONLWriter:
     ) -> None:
         """Context manager exit."""
         self.close()
+
+
+class JSONLStorageWriter:
+    """Storage backend implementing the JSONL format.
+
+    Maintains the legacy Turbulence format with separate instances.jsonl,
+    steps.jsonl, and assertions.jsonl files.
+    """
+
+    def __init__(self) -> None:
+        """Initialize JSONL storage backend."""
+        self._instances_writer: JSONLWriter | None = None
+        self._steps_writer: JSONLWriter | None = None
+        self._assertions_writer: JSONLWriter | None = None
+
+    def initialize(self, run_path: Path, manifest: RunManifest) -> None:
+        """Initialize the run directory and write the manifest.
+
+        Args:
+            run_path: Base directory for the run.
+            manifest: Run manifest containing configuration and metadata.
+        """
+        manifest_path = run_path / "manifest.json"
+        with manifest_path.open("w", encoding="utf-8") as f:
+            f.write(manifest.model_dump_json(indent=2))
+
+        self._instances_writer = JSONLWriter(run_path / "instances.jsonl").open()
+        self._steps_writer = JSONLWriter(run_path / "steps.jsonl").open()
+        self._assertions_writer = JSONLWriter(run_path / "assertions.jsonl").open()
+
+    def write_instance(self, record: InstanceRecord) -> None:
+        """Write an instance record."""
+        if self._instances_writer:
+            self._instances_writer.write(record)
+
+    def write_step(self, record: StepRecord) -> None:
+        """Write a step record."""
+        if self._steps_writer:
+            self._steps_writer.write(record)
+
+    def write_assertion(self, record: AssertionRecord) -> None:
+        """Write an assertion record."""
+        if self._assertions_writer:
+            self._assertions_writer.write(record)
+
+    def close(self) -> None:
+        """Close all open file handles."""
+        if self._instances_writer:
+            self._instances_writer.close()
+        if self._steps_writer:
+            self._steps_writer.close()
+        if self._assertions_writer:
+            self._assertions_writer.close()
 
 
 def write_jsonl_record(path: Path, record: dict[str, Any] | BaseModel) -> None:
