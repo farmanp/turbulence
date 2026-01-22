@@ -57,6 +57,30 @@ class TestRunCommand:
         result = runner.invoke(app, ["run", "--sut", "sut.yaml"])
         assert result.exit_code != 0
 
+    def test_run_profile_option(self) -> None:
+        """Run command shows --profile option in help."""
+        result = runner.invoke(app, ["run", "--help"])
+        assert result.exit_code == 0
+        output = strip_ansi(result.stdout)
+        assert "--profile" in output
+
+
+class TestProfilesCommand:
+    """Test the profiles command."""
+
+    def test_profiles_help_shows_sut_option(self) -> None:
+        """Profiles --help shows --sut option."""
+        result = runner.invoke(app, ["profiles", "--help"])
+        assert result.exit_code == 0
+        output = strip_ansi(result.stdout)
+        assert "--sut" in output
+
+    def test_profiles_command_exists(self) -> None:
+        """Profiles command is registered."""
+        result = runner.invoke(app, ["--help"])
+        assert result.exit_code == 0
+        assert "profiles" in result.stdout
+
 
 class TestReportCommand:
     """Test the report command options."""

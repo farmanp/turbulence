@@ -17,7 +17,20 @@ Options:
 - `--n, -n`: Number of workflow instances to run (default: 100).
 - `--parallel, -p`: Max concurrent instances (default: engine default).
 - `--seed`: Random seed for reproducible runs.
+- `--profile, -P`: Environment profile to activate (e.g. 'staging').
 - `--output, -o`: Output directory for artifacts (default: `runs`).
+
+## `turbulence profiles`
+
+List available environment profiles in a SUT configuration.
+
+```bash
+turbulence profiles --sut sut.yaml
+```
+
+Options:
+
+- `--sut, -s` (required): Path to the SUT YAML file.
 
 ## `turbulence report`
 

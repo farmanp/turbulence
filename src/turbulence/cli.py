@@ -3,7 +3,7 @@
 import typer
 
 from turbulence import __version__
-from turbulence.commands import replay, report, run, serve
+from turbulence.commands import profiles, replay, report, run, serve
 
 app = typer.Typer(
     name="turbulence",
@@ -16,6 +16,7 @@ app = typer.Typer(
 app.command(name="run", help="Execute workflow simulations")(run)
 app.command(name="report", help="Generate HTML report from run artifacts")(report)
 app.command(name="replay", help="Replay a specific workflow instance")(replay)
+app.command(name="profiles", help="List available environment profiles")(profiles)
 app.command(name="serve", help="Serve the Web UI dashboard")(serve)
 
 

@@ -84,8 +84,20 @@ A | B    : A and B can run in parallel (no dependency)
                                 (Instance Timeline)
                                        │
                                        ▼
-                                   FEAT-025
+                                   FEAT-025 [DONE]
                                 (Real-time WS)
+                                       │
+            ┌──────────────────────────┼──────────────────────────┐
+            │                          │                          │
+            ▼                          ▼                          ▼
+       FEAT-026                   FEAT-027                   FEAT-029
+   (Live Progress)            (Visualizer)               (Results Explorer)
+            │                          │
+            └──────────────────────────┘
+                          │
+                          ▼
+                     FEAT-028
+                 (Quick Launcher)
 ```
 
 ## Parallel Execution Batches
@@ -179,12 +191,13 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-019 | Branching flows and actor policies | FEAT-007, FEAT-006 | High | TODO |
 | SPIKE-001 | LLM-driven actor policy research | FEAT-017, FEAT-019 | Research | TODO |
 | SPIKE-002 | Python DSL for scenarios | FEAT-003 | Medium | TODO |
+| SPIKE-003 | Multi-protocol transport architecture | FEAT-007, FEAT-008 | Research | TODO |
 
 **Batch Notes:** These are optional enhancements. Can be deferred or worked based on priority. SPIKE-002 added as a potential future scenario definition method.
 
 ---
 
-### Batch 8: Web Intelligence Suite [PARTIALLY DONE]
+### Batch 8: Web Intelligence Suite [DONE]
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-020 | Web UI Foundation (Vite/React/Tailwind) | FEAT-021 | Medium | DONE |
@@ -192,9 +205,32 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-022 | Executive Dashboard (Run List) | FEAT-021 | Medium | DONE |
 | FEAT-023 | Deep Investigation View (Run Detail) | FEAT-021 | High | DONE |
 | FEAT-024 | Simulation Trace Timeline | FEAT-023 | High | DONE |
-| FEAT-025 | Real-time WebSocket Streaming | FEAT-021, FEAT-024 | High | TODO |
+| FEAT-025 | Real-time WebSocket Streaming | FEAT-021, FEAT-024 | High | DONE |
 
 **Batch Notes:** This batch focuses on providing a web-based interface for Turbulence. FEAT-021 provides the API layer, FEAT-020 sets up the frontend framework, and subsequent tickets build out specific UI components. FEAT-025 is the final piece for real-time updates.
+
+---
+
+### Batch 9: Web UI Enhancements
+| Ticket | Title | Dependencies | Estimated Complexity | Status |
+|--------|-------|--------------|---------------------|--------|
+| FEAT-026 | Run Dashboard Live Progress | FEAT-025 | Medium | TODO |
+| FEAT-027 | Scenario Visualizer | FEAT-021 | High | TODO |
+| FEAT-028 | Quick Run Launcher | FEAT-021, FEAT-027 | High | TODO |
+| FEAT-029 | Results Explorer | FEAT-023 | Medium | TODO |
+
+**Batch Notes:** This batch enhances the Web UI with interactive features. FEAT-026 requires WebSocket streaming from FEAT-025. FEAT-027 and FEAT-029 can start in parallel once their dependencies are met. FEAT-028 depends on both FastAPI backend and the scenario visualizer for preview functionality.
+
+---
+
+### Batch 10: Enterprise Readiness
+| Ticket | Title | Dependencies | Estimated Complexity | Status |
+|--------|-------|--------------|---------------------|--------|
+| FEAT-030 | Retry policies for HTTP actions | FEAT-004 | Medium | TODO |
+| FEAT-031 | Environment variable support | FEAT-002, FEAT-003 | Low | DONE |
+| FEAT-032 | Environment profiles | FEAT-031 | Medium | DONE |
+
+**Batch Notes:** This batch addresses enterprise requirements for production use. FEAT-031 (env vars) is foundational and should be prioritized. FEAT-032 (profiles) builds on env var support. FEAT-030 (retry) is independent and can be worked in parallel. These features enable secure, multi-environment testing workflows.
 
 ---
 
@@ -204,9 +240,9 @@ Execute each batch to completion before starting the next. Within a batch, all t
 |--------|-----------|--------|
 | INFRA-001 | - | FEAT-001, FEAT-002, FEAT-003 |
 | FEAT-001 | INFRA-001 | FEAT-010 |
-| FEAT-002 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006 |
-| FEAT-003 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, SPIKE-002 |
-| FEAT-004 | FEAT-002, FEAT-003 | FEAT-007, FEAT-012 |
+| FEAT-002 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, FEAT-031 |
+| FEAT-003 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, SPIKE-002, FEAT-031 |
+| FEAT-004 | FEAT-002, FEAT-003 | FEAT-007, FEAT-012, FEAT-030 |
 | FEAT-005 | FEAT-002, FEAT-003 | FEAT-007 |
 | FEAT-006 | FEAT-002, FEAT-003 | FEAT-007, FEAT-013, FEAT-014, FEAT-019 |
 | FEAT-007 | FEAT-004, FEAT-005, FEAT-006 | FEAT-008, FEAT-009, FEAT-010, FEAT-017, FEAT-019 |
@@ -224,12 +260,20 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-019 | FEAT-007, FEAT-006 | SPIKE-001, FEAT-020 |
 | SPIKE-001 | FEAT-017, FEAT-019 | FEAT-020 |
 | SPIKE-002 | FEAT-003 | - |
+| SPIKE-003 | FEAT-007, FEAT-008 | - |
 | FEAT-020 | FEAT-018, FEAT-019, SPIKE-001 | FEAT-021 |
-| FEAT-021 | FEAT-008, FEAT-020 | FEAT-022, FEAT-023, FEAT-025 |
+| FEAT-021 | FEAT-008, FEAT-020 | FEAT-022, FEAT-023, FEAT-025, FEAT-027, FEAT-028 |
 | FEAT-022 | FEAT-021 | - |
-| FEAT-023 | FEAT-021 | FEAT-024 |
+| FEAT-023 | FEAT-021 | FEAT-024, FEAT-029 |
 | FEAT-024 | FEAT-023 | FEAT-025 |
-| FEAT-025 | FEAT-021, FEAT-024 | - |
+| FEAT-025 | FEAT-021, FEAT-024 | FEAT-026 |
+| FEAT-026 | FEAT-025 | FEAT-028 |
+| FEAT-027 | FEAT-021 | FEAT-028 |
+| FEAT-028 | FEAT-021, FEAT-027 | - |
+| FEAT-029 | FEAT-023 | - |
+| FEAT-030 | FEAT-004 | - |
+| FEAT-031 | FEAT-002, FEAT-003 | FEAT-032 |
+| FEAT-032 | FEAT-031 | - |
 
 ## Critical Path
 
@@ -270,5 +314,5 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 
 ## AI Agent Status
 
-Turbulence core is stable. Focus shifted to Web UI visibility.
-**Current Frontier:** Real-time feedback loop (FEAT-025) and Advanced Engine features (Batch 7).
+Turbulence core and Web UI foundation are stable. Environment variable support and profiles are implemented.
+**Current Frontier:** Polish & CI (Batch 6), Advanced Engine (Batch 7), Web UI Enhancements (Batch 9), and Retry Policies (FEAT-030).

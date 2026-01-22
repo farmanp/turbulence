@@ -80,6 +80,12 @@ def run(
         "--seed",
         help="Random seed for reproducible runs (auto-generated if not provided)",
     ),
+    profile: str | None = typer.Option(
+        None,
+        "--profile",
+        "-P",
+        help="Environment profile to activate (e.g. 'staging', 'prod')",
+    ),
     output_dir: Path = typer.Option(
         Path("runs"),
         "--output",
@@ -104,6 +110,7 @@ def run(
             instances=n,
             parallelism=parallel,
             seed=seed,
+            profile=profile,
             output_dir=output_dir,
         )
     )
@@ -117,9 +124,10 @@ async def _run_instances(
     instances: int,
     parallelism: int,
     seed: int | None,
+    profile: str | None,
     output_dir: Path,
 ) -> int:
-    sut_config = load_sut(sut)
+    sut_config = load_sut(sut, profile=profile)
     scenario_list = load_scenarios(scenarios_dir)
     seed_value = seed if seed is not None else random.SystemRandom().randint(1, 2**31)
 
@@ -129,6 +137,7 @@ async def _run_instances(
     console.print("[bold blue]Turbulence Run[/bold blue]")
     console.print(f"  Run ID: {run_id}")
     console.print(f"  SUT config: {sut}")
+    console.print(f"  Profile: {profile or sut_config.default_profile or '(default)'}")
     console.print(f"  Scenarios: {scenarios_dir}")
     console.print(f"  Instances: {instances}")
     console.print(f"  Parallelism: {parallelism}")

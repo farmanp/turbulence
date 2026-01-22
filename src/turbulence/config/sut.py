@@ -33,6 +33,49 @@ class Service(BaseModel):
         return v
 
 
+class ProfileService(BaseModel):
+    """Service configuration overrides for a profile."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    base_url: HttpUrl | None = Field(
+        default=None,
+        description="Override base URL",
+    )
+    headers: dict[str, str] | None = Field(
+        default=None,
+        description="Override/merge headers",
+    )
+    timeout_seconds: float | None = Field(
+        default=None,
+        description="Override timeout",
+        gt=0,
+    )
+
+    @field_validator("base_url", mode="before")
+    @classmethod
+    def validate_base_url(cls, v: Any) -> Any:
+        """Ensure base_url doesn't have trailing slash."""
+        if isinstance(v, str):
+            return v.rstrip("/")
+        return v
+
+
+class Profile(BaseModel):
+    """Configuration overrides for a specific environment profile."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    default_headers: dict[str, str] | None = Field(
+        default=None,
+        description="Override default headers",
+    )
+    services: dict[str, ProfileService] | None = Field(
+        default=None,
+        description="Override service configurations",
+    )
+
+
 class SUTConfig(BaseModel):
     """System Under Test configuration.
 
@@ -55,6 +98,14 @@ class SUTConfig(BaseModel):
         ...,
         description="Map of service names to their configurations",
         min_length=1,
+    )
+    profiles: dict[str, Profile] = Field(
+        default_factory=dict,
+        description="Environment-specific configuration overrides",
+    )
+    default_profile: str | None = Field(
+        default=None,
+        description="Name of the profile to use if none specified via CLI",
     )
 
     def get_service(self, name: str) -> Service:

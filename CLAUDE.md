@@ -130,7 +130,7 @@ turbulence serve --port 8000
 
 ## Project Status
 
-**Completed (Batches 0-5, 8 partial):**
+**Completed (Batches 0-5, 8):**
 - CLI scaffold with all commands
 - SUT and scenario configuration
 - HTTP, Wait, Assert action runners
@@ -144,17 +144,18 @@ turbulence serve --port 8000
 - Safe expression evaluator
 - FastAPI backend
 - React dashboard (run list, run detail, instance timeline)
+- Real-time WebSocket streaming
+- Environment variable support
+- Environment profiles
 
-**In Progress:**
-- FEAT-025: Real-time WebSocket streaming
-
-**Upcoming (Batch 6-7):**
+**Upcoming (Batch 6-7, 9-10):**
 - Enhanced report aggregations
 - CI gating with thresholds
 - Deterministic variation engine
 - SQLite backend option
 - Branching flows
-- LLM-driven actor policies
+- Web UI enhancements (Scenario visualizer, live progress)
+- Retry policies (FEAT-030)
 
 See `tickets/TICKET-GRAPH.md` for full roadmap.
 
