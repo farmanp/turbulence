@@ -22,6 +22,22 @@ json:
   customer_id: "{{entry.seed_data.customer_id}}"
 ```
 
+## Environment Variables (Load-time)
+
+Environment variables are resolved when the configuration is **loaded**, before validation and before the simulation starts. This allows you to use secrets or environment-specific values in your SUT config and scenarios.
+
+The syntax is `{{env.VAR_NAME}}`. You can also provide a default value using `{{env.VAR_NAME | default:value}}`.
+
+Example:
+```yaml
+base_url: "{{env.API_BASE_URL}}"
+headers:
+  Authorization: "Bearer {{env.API_TOKEN}}"
+  X-Api-Key: "{{env.API_KEY | default:development-key}}"
+```
+
+> **Note:** Environment variables are resolved once at load time. Other templates like `{{run_id}}` or `{{entry.*}}` are resolved at execution time for each instance.
+
 ## Type Preservation
 
 If a value is **only** a template variable (e.g., `"{{amount}}"`), the rendered
