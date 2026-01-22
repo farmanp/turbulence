@@ -14,7 +14,14 @@ const sidebars = {
         "user/reporting",
         "user/replay",
         "user/turbulence",
-        "user/troubleshooting"
+        "user/troubleshooting",
+        {
+          type: "category",
+          label: "Guides",
+          items: [
+            "user/guides/ecommerce-testing"
+          ]
+        }
       ]
     },
     {

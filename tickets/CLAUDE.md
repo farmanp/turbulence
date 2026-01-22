@@ -7,5 +7,5 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #2171 | 9:13 AM | 🔵 | Turbulence ticket dependency graph and implementation status | ~537 |
+| #2171 | 9:13 AM | 🔵 | Windtunnel ticket dependency graph and implementation status | ~537 |
 </claude-mem-context>
