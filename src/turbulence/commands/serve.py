@@ -18,6 +18,24 @@ def serve(
         dir_okay=True,
         resolve_path=True,
     ),
+    sut_dir: Path = typer.Option(
+        Path("."),
+        "--sut-dir",
+        "-s",
+        help="Directory containing SUT configurations",
+        file_okay=False,
+        dir_okay=True,
+        resolve_path=True,
+    ),
+    scenarios_dir: Path = typer.Option(
+        Path("scenarios"),
+        "--scenarios-dir",
+        "-c",
+        help="Directory containing scenario definitions",
+        file_okay=False,
+        dir_okay=True,
+        resolve_path=True,
+    ),
     port: int = typer.Option(
         8000,
         "--port",
@@ -62,6 +80,8 @@ def serve(
     console.print()
     console.print("[bold blue]Turbulence Web UI[/bold blue]")
     console.print(f"  Runs directory: {runs_dir}")
+    console.print(f"  SUT directory: {sut_dir}")
+    console.print(f"  Scenarios directory: {scenarios_dir}")
     console.print(f"  API server: http://{host}:{port}")
     if static_dir:
         console.print(f"  Static files: {static_dir}")
@@ -69,5 +89,10 @@ def serve(
         console.print("  [dim]Frontend: Run 'npm run dev' in ui/ for development[/dim]")
     console.print()
 
-    app = create_app(runs_dir=runs_dir, static_dir=static_dir)
+    app = create_app(
+        runs_dir=runs_dir, 
+        sut_dir=sut_dir, 
+        scenarios_dir=scenarios_dir, 
+        static_dir=static_dir
+    )
     uvicorn.run(app, host=host, port=port)

@@ -3,6 +3,7 @@
 import asyncio
 import random
 import time
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,7 @@ import typer
 from rich.console import Console
 
 from turbulence.actions.assert_ import AssertActionRunner
-from turbulence.config.loader import load_scenarios, load_sut
+from turbulence.config.loader import load_scenario, load_scenarios, load_sut
 from turbulence.config.scenario import (
     AssertAction,
     Assertion,
@@ -37,6 +38,31 @@ from turbulence.pressure.engine import TurbulenceEngine
 from turbulence.storage.artifact import ArtifactStore
 
 console = Console()
+
+
+def generate_run_id(now: datetime | None = None) -> str:
+    """Generate a run ID using a UTC timestamp."""
+    timestamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%d_%H%M%S")
+    return f"run_{timestamp}"
+
+
+def load_scenarios_from_paths(scenario_paths: Sequence[Path]) -> list[Scenario]:
+    """Load and validate scenarios from explicit file paths."""
+    scenarios: list[Scenario] = []
+    for path in scenario_paths:
+        scenarios.append(load_scenario(path))
+
+    seen_ids: dict[str, Path] = {}
+    for scenario in scenarios:
+        source_path = scenario.source_path or Path("<unknown>")
+        if scenario.id in seen_ids:
+            raise ValueError(
+                f"Duplicate scenario ID '{scenario.id}' in {source_path} "
+                f"(also in {seen_ids[scenario.id]})"
+            )
+        seen_ids[scenario.id] = source_path
+
+    return scenarios
 
 
 def run(
@@ -131,7 +157,9 @@ def run(
 async def _run_instances(
     *,
     sut: Path,
-    scenarios_dir: Path,
+    scenarios_dir: Path | None = None,
+    scenario_list: list[Scenario] | None = None,
+    scenarios_label: str | None = None,
     instances: int,
     parallelism: int,
     seed: int | None,
@@ -139,6 +167,7 @@ async def _run_instances(
     output_dir: Path,
     fail_on: list[str] | None,
     storage: str = "jsonl",
+    run_id: str | None = None,
 ) -> int:
     # Parse thresholds early to fail fast
     thresholds: list[Threshold] = []
@@ -150,18 +179,27 @@ async def _run_instances(
                 console.print(f"[bold red]Configuration Error:[/bold red] {e}")
                 return 1
 
+    if scenario_list is None:
+        if scenarios_dir is None:
+            raise ValueError("Scenarios directory is required when no scenario list provided.")
+        scenario_list = load_scenarios(scenarios_dir)
+
+    if scenarios_label is None:
+        scenarios_label = str(scenarios_dir) if scenarios_dir is not None else "selected scenarios"
+
     sut_config = load_sut(sut, profile=profile)
-    scenario_list = load_scenarios(scenarios_dir)
     seed_value = seed if seed is not None else random.SystemRandom().randint(1, 2**31)
 
-    run_id = f"run_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+    if not run_id:
+        run_id = generate_run_id()
+    
     run_config = RunConfig(seed=seed_value, concurrency=parallelism)
 
     console.print("[bold blue]Turbulence Run[/bold blue]")
     console.print(f"  Run ID: {run_id}")
     console.print(f"  SUT config: {sut}")
     console.print(f"  Profile: {profile or sut_config.default_profile or '(default)'}")
-    console.print(f"  Scenarios: {scenarios_dir}")
+    console.print(f"  Scenarios: {scenarios_label}")
     console.print(f"  Instances: {instances}")
     console.print(f"  Parallelism: {parallelism}")
     console.print(f"  Seed: {seed_value}")

@@ -17,7 +17,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-import { parseScenario, getStepLabel, getStepDescription, type Scenario, type ScenarioStep } from '@/lib/yamlParser';
+import { parseScenario, type ScenarioStep } from '@/lib/yamlParser';
+import { generateFlowElements } from '@/lib/flowUtils';
 import { ScenarioNode, type ScenarioNodeData } from '@/components/flow/ScenarioNode';
 import { FlowLegend } from '@/components/flow/FlowLegend';
 import { StepDetailPanel } from '@/components/flow/StepDetailPanel';
@@ -251,57 +252,6 @@ export function ScenarioVisualizerPage() {
             </div>
         </div>
     );
-}
-
-// ============================================================================
-// Flow Generation
-// ============================================================================
-
-function generateFlowElements(scenario: Scenario): { nodes: Node[]; edges: Edge[] } {
-    const nodes: Node[] = [];
-    const edges: Edge[] = [];
-
-    const nodeSpacingY = 100;
-    const startY = 50;
-
-    // Generate nodes for flow steps
-    scenario.flow.forEach((step, index) => {
-        const nodeId = `step-${index}`;
-
-        const nodeData: ScenarioNodeData = {
-            step,
-            label: getStepLabel(step),
-            description: getStepDescription(step),
-            index,
-        };
-
-        nodes.push({
-            id: nodeId,
-            type: 'scenario',
-            position: { x: 0, y: startY + index * nodeSpacingY },
-            data: nodeData,
-        });
-
-        // Create edge to next node
-        if (index > 0) {
-            edges.push({
-                id: `edge-${index - 1}-${index}`,
-                source: `step-${index - 1}`,
-                target: nodeId,
-                type: 'smoothstep',
-                style: { stroke: '#475569', strokeWidth: 2 },
-                animated: false,
-            });
-        }
-    });
-
-    // Center nodes horizontally
-    const maxWidth = 280;
-    nodes.forEach((node) => {
-        node.position.x = -maxWidth / 2;
-    });
-
-    return { nodes, edges };
 }
 
 export default ScenarioVisualizerPage;

@@ -186,6 +186,7 @@ npm run docs:build        # Build static site
 - CI gating with thresholds
 - Live progress dashboard
 - Scenario visualizer (YAML-to-Flowchart)
+- Quick Run Launcher (UI-to-Engine orchestration)
 
 **Upcoming:**
 - Batch 6: Variation engine (FEAT-017)
