@@ -119,6 +119,10 @@ class HttpAction(BaseModel):
         default=None,
         description="Retry policy for this action",
     )
+    condition: str | None = Field(
+        default=None,
+        description="Skip this step if condition evaluates to false",
+    )
 
 
 class WaitAction(BaseModel):
@@ -145,6 +149,10 @@ class WaitAction(BaseModel):
         ...,
         description="Condition that must be met for wait to succeed",
     )
+    condition: str | None = Field(
+        default=None,
+        description="Skip this step if condition evaluates to false",
+    )
 
 
 class AssertAction(BaseModel):
@@ -158,13 +166,45 @@ class AssertAction(BaseModel):
         ...,
         description="Expectation to validate",
     )
+    condition: str | None = Field(
+        default=None,
+        description="Skip this step if condition evaluates to false",
+    )
+
+
+class BranchAction(BaseModel):
+    """Branch action for conditional flow execution.
+
+    Evaluates a condition and executes either if_true or if_false actions.
+    Actions in branches are executed sequentially.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., description="Unique name for this branch")
+    type: Literal["branch"] = Field("branch", description="Action type discriminator")
+    condition: str = Field(
+        ...,
+        description="Expression to evaluate (supports {{templates}} and Python expressions)",
+    )
+    if_true: list["Action"] = Field(
+        default_factory=list,
+        description="Actions to execute when condition is true",
+    )
+    if_false: list["Action"] = Field(
+        default_factory=list,
+        description="Actions to execute when condition is false",
+    )
 
 
 # Discriminated union for action types
 Action = Annotated[
-    HttpAction | WaitAction | AssertAction,
+    HttpAction | WaitAction | AssertAction | BranchAction,
     Field(discriminator="type"),
 ]
+
+# Rebuild models to resolve forward references for recursive BranchAction
+BranchAction.model_rebuild()
 
 
 class Assertion(BaseModel):
