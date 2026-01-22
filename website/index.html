@@ -34,6 +34,18 @@
                 }
             }
         }
+
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = element.innerHTML;
+                element.innerHTML = 'Copied!';
+                element.classList.add('text-cyan-400');
+                setTimeout(() => {
+                    element.innerHTML = originalText;
+                    element.classList.remove('text-cyan-400');
+                }, 2000);
+            });
+        }
     </script>
     <style>
         body {
@@ -134,8 +146,8 @@
             class="hidden md:flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
             <a href="#features" class="hover:text-cyan-400 transition-colors">Framework</a>
             <a href="#how-it-works" class="hover:text-cyan-400 transition-colors">Simulation</a>
-            <a href="https://github.com/your-org/windtunnel" class="hover:text-cyan-400 transition-colors">Artifacts</a>
-            <a href="#landing"
+            <a href="https://github.com/your-org/windtunnel" class="hover:text-cyan-400 transition-colors">GitHub</a>
+            <a href="#get-started"
                 class="px-6 py-2.5 rounded-full glass border-white/10 text-white hover:border-cyan-500/30 transition-all">
                 Access Engine
             </a>
@@ -166,10 +178,11 @@
                 class="px-10 py-5 bg-white text-obsidian-950 font-bold uppercase tracking-widest rounded-2xl hover:bg-cyan-400 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-cyan-500/30 text-xs">
                 Deploy Framework
             </a>
-            <div class="flex items-center px-8 py-5 glass border-white/5 rounded-2xl font-mono text-sm group">
+            <div class="flex items-center px-8 py-5 glass border-white/5 rounded-2xl font-mono text-sm group cursor-pointer" onclick="copyToClipboard('pip install windtunnel', this.querySelector('.cmd-text'))">
                 <span class="text-slate-600 mr-3">$</span>
-                <span class="text-slate-300">pip install <span
+                <span class="text-slate-300 cmd-text">pip install <span
                         class="text-white font-bold group-hover:text-cyan-400">windtunnel</span></span>
+                <svg class="w-4 h-4 ml-4 text-slate-600 group-hover:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
             </div>
         </div>
     </header>
@@ -288,7 +301,7 @@
             </div>
 
             <!-- Code Window -->
-            <div class="glass rounded-[2rem] border-white/10 overflow-hidden shadow-2xl relative">
+            <div id="how-it-works" class="glass rounded-[2rem] border-white/10 overflow-hidden shadow-2xl relative">
                 <div class="absolute inset-0 bg-indigo-500/5 blur-3xl rounded-full translate-x-1/2 translate-y-1/2">
                 </div>
                 <div class="flex items-center px-8 py-5 border-b border-white/5 bg-white/[0.02]">
@@ -368,6 +381,41 @@
         </div>
     </section>
 
+    <!-- Getting Started Section -->
+    <section id="get-started" class="container mx-auto px-8 py-40 border-t border-white/5">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white mb-4">Initialize the Engine</h2>
+                <p class="text-slate-400 leading-relaxed">Get Windtunnel up and running in your environment in seconds.</p>
+            </div>
+            <div class="space-y-6">
+                <div class="p-8 glass border-white/5 rounded-3xl relative overflow-hidden group">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Step 01 // Install</span>
+                        <div class="px-3 py-1 bg-cyan-500/10 text-cyan-500 text-[10px] font-bold rounded-full border border-cyan-500/20">Recommended</div>
+                    </div>
+                    <div class="flex items-center justify-between bg-black/40 p-5 rounded-2xl border border-white/5 font-mono text-sm group cursor-pointer" onclick="copyToClipboard('pip install windtunnel', this.querySelector('.cmd-text'))">
+                        <code class="text-slate-300">
+                            <span class="text-slate-600 mr-2">$</span>
+                            <span class="cmd-text">pip install <span class="text-white font-bold">windtunnel</span></span>
+                        </code>
+                        <svg class="w-4 h-4 text-slate-600 group-hover:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    </div>
+                </div>
+                <div class="p-8 glass border-white/5 rounded-3xl relative overflow-hidden group">
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] block mb-4">Step 02 // Execute</span>
+                    <div class="flex items-center justify-between bg-black/40 p-5 rounded-2xl border border-white/5 font-mono text-sm group cursor-pointer" onclick="copyToClipboard('windtunnel run --sut sut.yaml --scenarios scenarios/', this.querySelector('.cmd-text'))">
+                        <code class="text-slate-300">
+                            <span class="text-slate-600 mr-2">$</span>
+                            <span class="cmd-text">windtunnel run <span class="text-slate-500">--sut</span> sut.yaml</span>
+                        </code>
+                        <svg class="w-4 h-4 text-slate-600 group-hover:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="border-t border-white/5 py-24 mt-20 relative overflow-hidden">
         <div
@@ -392,9 +440,9 @@
                     </p>
                 </div>
                 <div class="flex gap-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
-                    <a href="#" class="hover:text-cyan-400 transition-colors">Documentation</a>
-                    <a href="#" class="hover:text-cyan-400 transition-colors">GitHub</a>
-                    <a href="#" class="hover:text-cyan-400 transition-colors">MIT_License</a>
+                    <a href="https://github.com/your-org/windtunnel" class="hover:text-cyan-400 transition-colors">Documentation</a>
+                    <a href="https://github.com/your-org/windtunnel" class="hover:text-cyan-400 transition-colors">GitHub</a>
+                    <a href="https://github.com/your-org/windtunnel/blob/main/LICENSE" class="hover:text-cyan-400 transition-colors">MIT_License</a>
                 </div>
             </div>
             <div class="mt-24 pt-8 border-t border-white/5 text-center">
