@@ -61,7 +61,7 @@ See [TICKET-GRAPH.md](tickets/TICKET-GRAPH.md) for the detailed dependency graph
 7. **Web Intelligence**: Web UI, Backend API, Dashboards, and Real-time Streaming (FEAT-020, 021, 022, 023, 024, 025) - **DONE**
 8. **Enterprise Readiness**: Retry policies, Env vars, Profiles (FEAT-030, 031, 032) - **DONE**
 9. **Polish & CI**: Reports, CI Gating (FEAT-015, 016) - **DONE**
-10. **Web UI Enhancements**: Live Progress, Visualizer, Quick Launcher (FEAT-026, 027, 028) - **DONE**
+10. **Web UI Enhancements**: Live Progress, Visualizer, Quick Launcher, Results Explorer (FEAT-026, 027, 028, 029) - **DONE**
 11. **Advanced Engine**: SQLite Backend, Branching Flows (FEAT-018, 019) - **DONE**
 
 ## 📄 License
