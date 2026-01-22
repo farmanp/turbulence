@@ -184,7 +184,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 
 ---
 
-### Batch 7: Advanced Engine
+### Batch 7: Advanced Engine [PARTIALLY DONE]
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-018 | SQLite backend for run storage | FEAT-008 | Medium | DONE |
