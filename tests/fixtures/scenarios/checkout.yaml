@@ -1,0 +1,58 @@
+id: checkout-happy-path
+description: Complete checkout flow with payment
+
+entry:
+  seed_data:
+    cart_items:
+      - sku: "WIDGET-001"
+        quantity: 2
+        price: 29.99
+    customer_id: "cust_{{uuid}}"
+
+flow:
+  - name: create_cart
+    type: http
+    service: api
+    method: POST
+    path: /carts
+    json:
+      customer_id: "{{entry.seed_data.customer_id}}"
+      items: "{{entry.seed_data.cart_items}}"
+    extract:
+      cart_id: "$.id"
+      total: "$.total"
+
+  - name: process_payment
+    type: http
+    service: payments
+    method: POST
+    path: /charges
+    json:
+      amount: "{{total}}"
+      cart_id: "{{cart_id}}"
+    extract:
+      payment_id: "$.id"
+      status: "$.status"
+
+  - name: wait_for_confirmation
+    type: wait
+    service: api
+    method: GET
+    path: /orders/{{cart_id}}
+    interval_seconds: 1
+    timeout_seconds: 30
+    expect:
+      jsonpath: "$.status"
+      equals: "confirmed"
+
+assertions:
+  - name: payment_completed
+    expect:
+      status_code: 200
+      jsonpath: "$.payment_status"
+      equals: "captured"
+
+stop_when:
+  any_assertion_fails: true
+
+max_steps: 50

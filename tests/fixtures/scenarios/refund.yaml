@@ -1,0 +1,50 @@
+id: refund-flow
+description: Request and process a refund for an order
+
+entry:
+  seed_data:
+    order_id: "order_{{uuid}}"
+    reason: "Item not as described"
+
+flow:
+  - name: request_refund
+    type: http
+    service: api
+    method: POST
+    path: /orders/{{entry.seed_data.order_id}}/refunds
+    json:
+      reason: "{{entry.seed_data.reason}}"
+    extract:
+      refund_id: "$.id"
+      refund_status: "$.status"
+
+  - name: wait_for_refund_processing
+    type: wait
+    service: payments
+    method: GET
+    path: /refunds/{{refund_id}}
+    interval_seconds: 2
+    timeout_seconds: 60
+    expect:
+      jsonpath: "$.status"
+      equals: "processed"
+
+  - name: verify_refund_amount
+    type: assert
+    expect:
+      jsonpath: "$.amount"
+      equals: "{{entry.seed_data.original_amount}}"
+
+assertions:
+  - name: refund_completed
+    expect:
+      status_code: 200
+      jsonpath: "$.status"
+      equals: "completed"
+
+  - name: customer_notified
+    expect:
+      jsonpath: "$.notification_sent"
+      equals: true
+
+max_steps: 30
