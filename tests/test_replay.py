@@ -159,9 +159,7 @@ class TestInstanceData:
 class TestReplayEngine:
     """Tests for ReplayEngine class."""
 
-    def test_load_instance_success(
-        self, temp_runs_dir: Path
-    ) -> None:
+    def test_load_instance_success(self, temp_runs_dir: Path) -> None:
         """Test loading an instance successfully."""
         engine = ReplayEngine(runs_dir=temp_runs_dir)
         instance = engine.load_instance("run_001", "inst_test123")
@@ -473,9 +471,7 @@ class TestReplayResult:
 class TestReplayCommand:
     """Tests for the replay CLI command."""
 
-    def test_replay_run_not_found(
-        self, cli_runner: CliRunner, tmp_path: Path
-    ) -> None:
+    def test_replay_run_not_found(self, cli_runner: CliRunner, tmp_path: Path) -> None:
         """Test replay with non-existent run."""
         from turbulence.cli import app
 
@@ -588,9 +584,7 @@ class TestReplayEdgeCases:
 
         assert instance.instance_id == "inst_valid"
 
-    def test_multiple_instances_in_file(
-        self, temp_runs_dir: Path
-    ) -> None:
+    def test_multiple_instances_in_file(self, temp_runs_dir: Path) -> None:
         """Test loading correct instance from file with multiple instances."""
         engine = ReplayEngine(runs_dir=temp_runs_dir)
 

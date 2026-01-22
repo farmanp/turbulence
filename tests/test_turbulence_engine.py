@@ -27,9 +27,7 @@ async def test_latency_injection_records_latency() -> None:
 
     async def execute() -> tuple[Observation, dict[str, Any]]:
         return (
-            Observation(
-                ok=True, status_code=200, latency_ms=1, action_name="get_user"
-            ),
+            Observation(ok=True, status_code=200, latency_ms=1, action_name="get_user"),
             context,
         )
 
@@ -49,9 +47,7 @@ async def test_latency_injection_records_latency() -> None:
 @pytest.mark.asyncio
 async def test_timeout_injection_forces_failure() -> None:
     """Injected timeout aborts execution."""
-    config = TurbulenceConfig(
-        global_policy=TurbulencePolicy(timeout_after_ms=5)
-    )
+    config = TurbulenceConfig(global_policy=TurbulencePolicy(timeout_after_ms=5))
     engine = TurbulenceEngine(config, seed=123)
     policy = config.resolve(service="api", action="slow_call")
     context = {"instance_id": "inst_2"}
@@ -59,9 +55,7 @@ async def test_timeout_injection_forces_failure() -> None:
     async def execute() -> tuple[Observation, dict[str, Any]]:
         await asyncio.sleep(0.05)
         return (
-            Observation(
-                ok=True, status_code=200, latency_ms=50, action_name="slow_op"
-            ),
+            Observation(ok=True, status_code=200, latency_ms=50, action_name="slow_op"),
             context,
         )
 
@@ -81,9 +75,7 @@ async def test_timeout_injection_forces_failure() -> None:
 @pytest.mark.asyncio
 async def test_retry_storm_repeats_attempts() -> None:
     """Retry count triggers multiple attempts."""
-    config = TurbulenceConfig(
-        global_policy=TurbulencePolicy(retry_count=2)
-    )
+    config = TurbulenceConfig(global_policy=TurbulencePolicy(retry_count=2))
     engine = TurbulenceEngine(config, seed=123)
     policy = config.resolve(service="api", action="retry_call")
     context = {"instance_id": "inst_3"}
@@ -92,9 +84,7 @@ async def test_retry_storm_repeats_attempts() -> None:
     async def execute() -> tuple[Observation, dict[str, Any]]:
         calls["count"] += 1
         return (
-            Observation(
-                ok=False, status_code=500, latency_ms=1, action_name="fail_op"
-            ),
+            Observation(ok=False, status_code=500, latency_ms=1, action_name="fail_op"),
             dict(context),
         )
 

@@ -324,9 +324,7 @@ class TestContextWithTemplateEngine:
         entry_data = {"seed_data": {"email": "test@example.com"}}
         ctx = WorkflowContext.from_scenario_entry(entry_data)
 
-        result = engine.render_string(
-            "{{entry.seed_data.email}}", ctx.to_dict()
-        )
+        result = engine.render_string("{{entry.seed_data.email}}", ctx.to_dict())
         assert result == "test@example.com"
 
     def test_run_and_correlation_ids_accessible(self) -> None:

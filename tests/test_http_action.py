@@ -421,9 +421,7 @@ class TestHttpActionRunner:
         assert updated_context["user_id"] == 123
 
     @pytest.mark.asyncio
-    async def test_no_extraction_on_failed_request(
-        self, sut_config: SUTConfig
-    ) -> None:
+    async def test_no_extraction_on_failed_request(self, sut_config: SUTConfig) -> None:
         """Test that extraction is not attempted on failed requests."""
         action = HttpAction(
             name="no-extract-on-error",

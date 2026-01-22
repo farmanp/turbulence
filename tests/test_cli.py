@@ -1,11 +1,19 @@
 """Tests for CLI commands (FEAT-001)."""
 
+import re
+
 from typer.testing import CliRunner
 
 from turbulence import __version__
 from turbulence.cli import app
 
 runner = CliRunner()
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI escape codes from text."""
+    ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+    return ansi_escape.sub("", text)
 
 
 class TestVersionDisplay:
@@ -31,11 +39,12 @@ class TestRunCommand:
         """Run --help shows all required options."""
         result = runner.invoke(app, ["run", "--help"])
         assert result.exit_code == 0
-        assert "--sut" in result.stdout
-        assert "--scenarios" in result.stdout
-        assert "--n" in result.stdout
-        assert "--parallel" in result.stdout
-        assert "--seed" in result.stdout
+        output = strip_ansi(result.stdout)
+        assert "--sut" in output
+        assert "--scenarios" in output
+        assert "--n" in output
+        assert "--parallel" in output
+        assert "--seed" in output
 
     def test_run_requires_sut_option(self) -> None:
         """Run command requires --sut option."""
@@ -56,7 +65,8 @@ class TestReportCommand:
         """Report --help shows --run-id option."""
         result = runner.invoke(app, ["report", "--help"])
         assert result.exit_code == 0
-        assert "--run-id" in result.stdout
+        output = strip_ansi(result.stdout)
+        assert "--run-id" in output
 
     def test_report_requires_run_id(self) -> None:
         """Report command requires --run-id option."""
@@ -71,8 +81,9 @@ class TestReplayCommand:
         """Replay --help shows --run-id and --instance-id options."""
         result = runner.invoke(app, ["replay", "--help"])
         assert result.exit_code == 0
-        assert "--run-id" in result.stdout
-        assert "--instance-id" in result.stdout
+        output = strip_ansi(result.stdout)
+        assert "--run-id" in output
+        assert "--instance-id" in output
 
     def test_replay_requires_both_ids(self) -> None:
         """Replay command requires both --run-id and --instance-id."""

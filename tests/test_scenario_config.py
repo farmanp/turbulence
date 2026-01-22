@@ -29,29 +29,31 @@ class TestScenarioModel:
 
     def test_full_scenario(self) -> None:
         """Scenario with all fields."""
-        scenario = Scenario.model_validate({
-            "id": "checkout",
-            "description": "Checkout flow",
-            "entry": {
-                "seed_data": {"user_id": "123"},
-            },
-            "flow": [
-                {
-                    "name": "create_cart",
-                    "type": "http",
-                    "service": "api",
-                    "method": "POST",
-                    "path": "/carts",
+        scenario = Scenario.model_validate(
+            {
+                "id": "checkout",
+                "description": "Checkout flow",
+                "entry": {
+                    "seed_data": {"user_id": "123"},
                 },
-            ],
-            "assertions": [
-                {
-                    "name": "cart_created",
-                    "expect": {"status_code": 201},
-                },
-            ],
-            "max_steps": 50,
-        })
+                "flow": [
+                    {
+                        "name": "create_cart",
+                        "type": "http",
+                        "service": "api",
+                        "method": "POST",
+                        "path": "/carts",
+                    },
+                ],
+                "assertions": [
+                    {
+                        "name": "cart_created",
+                        "expect": {"status_code": 201},
+                    },
+                ],
+                "max_steps": 50,
+            }
+        )
         assert scenario.id == "checkout"
         assert scenario.description == "Checkout flow"
         assert scenario.max_steps == 50
@@ -69,41 +71,47 @@ class TestActionTypes:
 
     def test_http_action(self) -> None:
         """HTTP action parses correctly."""
-        action = HttpAction.model_validate({
-            "name": "get_user",
-            "type": "http",
-            "service": "api",
-            "method": "GET",
-            "path": "/users/123",
-        })
+        action = HttpAction.model_validate(
+            {
+                "name": "get_user",
+                "type": "http",
+                "service": "api",
+                "method": "GET",
+                "path": "/users/123",
+            }
+        )
         assert action.type == "http"
         assert action.method == "GET"
         assert action.path == "/users/123"
 
     def test_http_action_with_extract(self) -> None:
         """HTTP action with JSONPath extraction."""
-        action = HttpAction.model_validate({
-            "name": "create_user",
-            "type": "http",
-            "service": "api",
-            "method": "POST",
-            "path": "/users",
-            "json": {"name": "Test"},
-            "extract": {"user_id": "$.id"},
-        })
+        action = HttpAction.model_validate(
+            {
+                "name": "create_user",
+                "type": "http",
+                "service": "api",
+                "method": "POST",
+                "path": "/users",
+                "json": {"name": "Test"},
+                "extract": {"user_id": "$.id"},
+            }
+        )
         assert action.extract == {"user_id": "$.id"}
 
     def test_wait_action(self) -> None:
         """Wait action parses correctly."""
-        action = WaitAction.model_validate({
-            "name": "wait_ready",
-            "type": "wait",
-            "service": "api",
-            "path": "/status",
-            "interval_seconds": 2,
-            "timeout_seconds": 60,
-            "expect": {"jsonpath": "$.ready", "equals": True},
-        })
+        action = WaitAction.model_validate(
+            {
+                "name": "wait_ready",
+                "type": "wait",
+                "service": "api",
+                "path": "/status",
+                "interval_seconds": 2,
+                "timeout_seconds": 60,
+                "expect": {"jsonpath": "$.ready", "equals": True},
+            }
+        )
         assert action.type == "wait"
         assert action.interval_seconds == 2
         assert action.timeout_seconds == 60
@@ -112,40 +120,44 @@ class TestActionTypes:
 
     def test_assert_action(self) -> None:
         """Assert action parses correctly."""
-        action = AssertAction.model_validate({
-            "name": "check_status",
-            "type": "assert",
-            "expect": {"status_code": 200},
-        })
+        action = AssertAction.model_validate(
+            {
+                "name": "check_status",
+                "type": "assert",
+                "expect": {"status_code": 200},
+            }
+        )
         assert action.type == "assert"
         assert action.expect.status_code == 200
 
     def test_action_discriminator_in_scenario(self) -> None:
         """Actions in flow are discriminated by type."""
-        scenario = Scenario.model_validate({
-            "id": "test",
-            "flow": [
-                {
-                    "name": "http_step",
-                    "type": "http",
-                    "service": "api",
-                    "method": "GET",
-                    "path": "/test",
-                },
-                {
-                    "name": "wait_step",
-                    "type": "wait",
-                    "service": "api",
-                    "path": "/status",
-                    "expect": {"jsonpath": "$.done", "equals": True},
-                },
-                {
-                    "name": "assert_step",
-                    "type": "assert",
-                    "expect": {"status_code": 200},
-                },
-            ],
-        })
+        scenario = Scenario.model_validate(
+            {
+                "id": "test",
+                "flow": [
+                    {
+                        "name": "http_step",
+                        "type": "http",
+                        "service": "api",
+                        "method": "GET",
+                        "path": "/test",
+                    },
+                    {
+                        "name": "wait_step",
+                        "type": "wait",
+                        "service": "api",
+                        "path": "/status",
+                        "expect": {"jsonpath": "$.done", "equals": True},
+                    },
+                    {
+                        "name": "assert_step",
+                        "type": "assert",
+                        "expect": {"status_code": 200},
+                    },
+                ],
+            }
+        )
         assert isinstance(scenario.flow[0], HttpAction)
         assert isinstance(scenario.flow[1], WaitAction)
         assert isinstance(scenario.flow[2], AssertAction)
@@ -157,7 +169,8 @@ class TestLoadScenario:
     def test_load_valid_file(self, tmp_path: Path) -> None:
         """Load a valid scenario YAML file."""
         scenario_file = tmp_path / "test.yaml"
-        scenario_file.write_text(dedent("""
+        scenario_file.write_text(
+            dedent("""
             id: test-scenario
             description: A test scenario
             flow:
@@ -166,7 +179,8 @@ class TestLoadScenario:
                 service: api
                 method: GET
                 path: /data
-        """))
+        """)
+        )
 
         scenario = load_scenario(scenario_file)
         assert scenario.id == "test-scenario"
@@ -180,9 +194,11 @@ class TestLoadScenario:
     def test_load_validation_error(self, tmp_path: Path) -> None:
         """Validation errors are reported."""
         scenario_file = tmp_path / "invalid.yaml"
-        scenario_file.write_text(dedent("""
+        scenario_file.write_text(
+            dedent("""
             description: Missing ID
-        """))
+        """)
+        )
 
         with pytest.raises(ConfigLoadError, match="validation failed"):
             load_scenario(scenario_file)

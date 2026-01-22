@@ -224,11 +224,7 @@ class TestJsonPathAssertion:
         context = {
             "last_response": {
                 "status_code": 200,
-                "body": {
-                    "user": {
-                        "profile": {"name": "John", "age": 30}
-                    }
-                },
+                "body": {"user": {"profile": {"name": "John", "age": 30}}},
             }
         }
 
@@ -371,9 +367,7 @@ class TestContextPathAssertion:
         runner = AssertActionRunner(action)
 
         context = {
-            "user": {
-                "profile": {"id": 42, "name": "Test"}
-            },
+            "user": {"profile": {"id": 42, "name": "Test"}},
             "last_response": {"status_code": 200, "body": {}},
         }
 
@@ -583,9 +577,7 @@ class TestSchemaAssertion:
                                     "type": "array",
                                     "items": {
                                         "type": "object",
-                                        "properties": {
-                                            "price": {"type": "number"}
-                                        },
+                                        "properties": {"price": {"type": "number"}},
                                         "required": ["price"],
                                     },
                                 }
@@ -627,9 +619,7 @@ class TestExpressionAssertion:
 
         context = {
             "last_response": {
-                "body": {
-                    "entries": [{"amount": 10}, {"amount": 20}, {"amount": 30}]
-                }
+                "body": {"entries": [{"amount": 10}, {"amount": 20}, {"amount": 30}]}
             }
         }
 
@@ -729,9 +719,7 @@ class TestExpressionAssertion:
         action = AssertAction(
             name="header_check",
             type="assert",
-            expect=Expectation(
-                expression="headers['X-Request-ID'].startswith('req_')"
-            ),
+            expect=Expectation(expression="headers['X-Request-ID'].startswith('req_')"),
         )
         runner = AssertActionRunner(action)
 
