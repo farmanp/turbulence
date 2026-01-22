@@ -16,11 +16,13 @@ from turbulence.actions.wait import WaitActionRunner
 from turbulence.config.scenario import (
     Action,
     AssertAction,
+    BranchAction,
     HttpAction,
     Scenario,
     WaitAction,
 )
 from turbulence.config.sut import SUTConfig
+from turbulence.engine.conditions import ConditionEvaluator
 from turbulence.engine.template import TemplateEngine
 from turbulence.models.observation import Observation
 from turbulence.pressure.engine import TurbulenceEngine
@@ -52,6 +54,7 @@ class ScenarioRunner:
         self.template_engine = template_engine
         self.sut_config = sut_config
         self.turbulence_engine = turbulence_engine
+        self.condition_evaluator = ConditionEvaluator(template_engine)
 
     async def execute_flow(
         self,
@@ -75,31 +78,158 @@ class ScenarioRunner:
         step_delay_ms = variation_data.get("_step_delay_ms", 0)
         jitter_ms = variation_data.get("_timing_jitter_ms", 0)
 
-        for step_index, action in enumerate(scenario.flow):
-            # Apply delays/jitter
+        # Handle max_steps to prevent infinite loops (mostly relevant for future looping features,
+        # but good for branching too)
+        max_steps = getattr(scenario.stop_when, "max_steps", 100)
+        steps_executed = 0
+
+        # We use a helper to implement recursive execution for BranchAction
+        async for result in self._execute_actions_recursive(
+            actions=scenario.flow,
+            context=context,
+            client=client,
+            start_index=0,
+            step_delay_ms=step_delay_ms,
+            jitter_ms=jitter_ms,
+        ):
+            yield result
+            steps_executed += 1
+            
+            # Stop if global max reached
+            if steps_executed >= max_steps:
+                logger.warning(f"Scenario {scenario.id} reached max_steps ({max_steps})")
+                break
+
+            # Stop if last action failed and scenario is configured to halt
+            _, _, observation, _ = result
+            if not observation.ok and scenario.stop_when.any_action_fails:
+                break
+
+    async def _execute_actions_recursive(
+        self,
+        actions: list[Action],
+        context: dict[str, Any],
+        client: httpx.AsyncClient,
+        start_index: int,
+        step_delay_ms: int,
+        jitter_ms: int,
+    ) -> AsyncIterator[tuple[int, Action, Observation, dict[str, Any]]]:
+        """Recursively execute a list of actions (to support nested branches)."""
+        idx = start_index
+        for action in actions:
+            # Check condition if present (for simple conditional skip)
+            if hasattr(action, "condition") and action.condition and not isinstance(action, BranchAction):
+                result, rendered = self.condition_evaluator.evaluate_safe(
+                    action.condition, context, default=True
+                )
+                if not result:
+                    # Yield a "Skipped" observation
+                    skip_obs = Observation(
+                        ok=True,
+                        status_code=None,
+                        latency_ms=0.0,
+                        headers={},
+                        body=None,
+                        action_name=action.name,
+                        service=None,
+                        branch_condition=action.condition,
+                        branch_result=False,
+                        condition_skipped=True,
+                    )
+                    logger.debug(
+                        f"Skipped action '{action.name}' due to false condition: "
+                        f"{action.condition} → {rendered}"
+                    )
+                    yield idx, action, skip_obs, context
+                    idx += 1
+                    continue
+
+            # Apply delays/jitter (only between top-level actions or first in branch?)
+            # For simplicity, we apply before every non-skipped action
             total_delay_ms = 0
-            if step_index > 0:
+            if idx > 0:
                 total_delay_ms += step_delay_ms
             total_delay_ms += jitter_ms
 
             if total_delay_ms > 0:
                 await asyncio.sleep(total_delay_ms / 1000.0)
 
-            observation, context = await self._execute_action(
-                action=action,
-                context=context,
-                client=client,
-            )
+            if isinstance(action, BranchAction):
+                # Execute BranchAction logic
+                obs, context, branch_results = await self._execute_branch(action, context, client, step_delay_ms, jitter_ms)
+                
+                # Yield the branch decision observation
+                yield idx, action, obs, context
+                idx += 1
+                
+                # Then yield each individual step observation from the branch
+                for b_idx, b_action, b_obs, b_context in branch_results:
+                    # Update the global context with the nested execution's result
+                    context = b_context
+                    yield b_idx, b_action, b_obs, context
+            else:
+                # Normal action execution
+                observation, context = await self._execute_action(
+                    action=action,
+                    context=context,
+                    client=client,
+                )
 
-            # Update last_response context for HTTP and Wait actions
-            if isinstance(action, (HttpAction, WaitAction)):
-                self._update_last_response(context, observation)
+                # Update last_response context for HTTP and Wait actions
+                if isinstance(action, (HttpAction, WaitAction)):
+                    self._update_last_response(context, observation)
 
-            yield step_index, action, observation, context
+                yield idx, action, observation, context
+                idx += 1
 
-            # Stop if action failed and scenario is configured to halt
-            if not observation.ok and scenario.stop_when.any_action_fails:
-                break
+    async def _execute_branch(
+        self,
+        action: BranchAction,
+        context: dict[str, Any],
+        client: httpx.AsyncClient,
+        step_delay_ms: int,
+        jitter_ms: int,
+    ) -> tuple[Observation, dict[str, Any], list[tuple[int, Action, Observation, dict[str, Any]]]]:
+        """Evaluate a branch condition and prepare execution results."""
+        # Evaluate the branch condition
+        decision, rendered = self.condition_evaluator.evaluate_safe(
+            action.condition, context, default=False
+        )
+        branch_name = "if_true" if decision else "if_false"
+        branch_actions = action.if_true if decision else action.if_false
+
+        logger.debug(
+            f"Branch '{action.name}': {action.condition} → {rendered} = {decision}, "
+            f"taking {branch_name} ({len(branch_actions)} actions)"
+        )
+
+        obs = Observation(
+            ok=True,
+            status_code=None,
+            latency_ms=0.0,
+            headers={},
+            body=None,
+            action_name=action.name,
+            service=None,
+            branch_condition=action.condition,
+            branch_result=decision,
+            branch_taken=branch_name,
+        )
+
+        results: list[tuple[int, Action, Observation, dict[str, Any]]] = []
+        # Execute nested actions
+        async for r in self._execute_actions_recursive(
+            actions=branch_actions,
+            context=context,
+            client=client,
+            start_index=0,
+            step_delay_ms=step_delay_ms,
+            jitter_ms=jitter_ms,
+        ):
+            results.append(r)
+            context = r[3]  # Update context for next step in branch
+
+        return obs, context, results
 
     async def _execute_action(
         self,
@@ -181,8 +311,12 @@ class ScenarioRunner:
             return HttpAction(**rendered_dict)
         if isinstance(action, WaitAction):
             return WaitAction(**rendered_dict)
-        # AssertAction is the only remaining possibility
-        return AssertAction(**rendered_dict)
+        if isinstance(action, AssertAction):
+            return AssertAction(**rendered_dict)
+        if isinstance(action, BranchAction):
+            return BranchAction(**rendered_dict)
+        
+        raise ValueError(f"Unknown action type for rendering: {type(action)}")
 
     def _update_last_response(
         self,
