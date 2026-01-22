@@ -62,7 +62,7 @@ A | B    : A and B can run in parallel (no dependency)
             ┌───────────────┴──────────┬─────────┴───────────────┐
             │                          │                         │
             ▼                          ▼                         ▼
-       FEAT-018                   FEAT-019                   SPIKE-001
+       FEAT-018                   FEAT-019 [DONE]            SPIKE-001
        (SQLite)                  (Branching)               (LLM Actor)
             │                          │                         │
             └──────────────────────────┼─────────────────────────┘
@@ -188,7 +188,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-018 | SQLite backend for run storage | FEAT-008 | Medium | TODO |
-| FEAT-019 | Branching flows and actor policies | FEAT-007, FEAT-006 | High | TODO |
+| FEAT-019 | Branching flows and actor policies | FEAT-007, FEAT-006 | High | DONE |
 | SPIKE-001 | LLM-driven actor policy research | FEAT-017, FEAT-019 | Research | TODO |
 | SPIKE-002 | Python DSL for scenarios | FEAT-003 | Medium | TODO |
 | SPIKE-003 | Multi-protocol transport architecture | FEAT-007, FEAT-008 | Research | TODO |
@@ -315,4 +315,5 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 ## AI Agent Status
 
 Turbulence core and Web UI foundation are stable. Live progress dashboard is implemented.
-**Current Frontier:** Polish & CI (Batch 6), Advanced Engine (Batch 7), Web UI Enhancements (Batch 9), and Deterministic Variation (FEAT-017).
+Branching flows (FEAT-019) completed with condition evaluation and BranchAction support.
+**Current Frontier:** Advanced Engine (Batch 7: SQLite, Spikes), Web UI Enhancements (Batch 9).
