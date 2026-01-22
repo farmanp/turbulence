@@ -15,6 +15,7 @@ from rich.progress import (
     MofNCompleteColumn,
     Progress,
     SpinnerColumn,
+    TaskID,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
@@ -114,7 +115,7 @@ class ParallelExecutor:
 
         # Progress tracking
         self._progress: Progress | None = None
-        self._task_id: int | None = None
+        self._task_id: TaskID | None = None
 
     @property
     def parallelism(self) -> int:
@@ -254,13 +255,14 @@ class ParallelExecutor:
             return None
 
         # Acquire semaphore to limit concurrency
-        if self._semaphore is None:
+        semaphore = self._semaphore
+        if semaphore is None:
             return None
 
-        async with self._semaphore:
+        async with semaphore:
             # Check again after acquiring (in case cancelled while waiting)
-            if self._cancel_requested:
-                async with self._lock:
+            if self._cancel_requested:  # noqa: SIM102
+                async with self._lock:  # type: ignore[unreachable]
                     self._stats.cancelled += 1
                     if self._progress and self._task_id is not None:
                         self._progress.update(self._task_id, advance=1)

@@ -305,15 +305,15 @@ async def _execute_action(
             )
         return await runner.execute(context)
     if isinstance(rendered_action, WaitAction):
-        runner = WaitActionRunner(
+        wait_runner = WaitActionRunner(
             action=rendered_action,
             sut_config=sut_config,
             client=client,
         )
-        return await runner.execute(context)
+        return await wait_runner.execute(context)
     if isinstance(rendered_action, AssertAction):
-        runner = AssertActionRunner(action=rendered_action)
-        return await runner.execute(context)
+        assert_runner = AssertActionRunner(action=rendered_action)
+        return await assert_runner.execute(context)
 
     raise ValueError(f"Unknown action type: {type(action)}")
 
@@ -330,6 +330,8 @@ async def _execute_assertion(
         expect=assertion.expect,
     )
     rendered_action = _render_action(assert_action, context, template_engine)
+    if not isinstance(rendered_action, AssertAction):
+        raise TypeError("Expected AssertAction after rendering")
     runner = AssertActionRunner(action=rendered_action)
     return await runner.execute(context)
 
@@ -346,8 +348,8 @@ def _render_action(
         return HttpAction(**rendered_dict)
     if isinstance(action, WaitAction):
         return WaitAction(**rendered_dict)
-    if isinstance(action, AssertAction):
-        return AssertAction(**rendered_dict)
+    # AssertAction is the only remaining possibility
+    return AssertAction(**rendered_dict)
 
 
 def _update_last_response(context: dict[str, Any], observation: Observation) -> None:

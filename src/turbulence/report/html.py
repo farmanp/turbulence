@@ -93,7 +93,8 @@ class HTMLReportGenerator:
         if not manifest_path.exists():
             return {}
         with manifest_path.open() as f:
-            return json.load(f)
+            result: dict[str, Any] = json.load(f)
+            return result
 
     def _load_summary(self) -> dict[str, Any]:
         """Load the run summary.json file."""
@@ -101,7 +102,8 @@ class HTMLReportGenerator:
         if not summary_path.exists():
             return {}
         with summary_path.open() as f:
-            return json.load(f)
+            result: dict[str, Any] = json.load(f)
+            return result
 
     def _load_jsonl(self, filename: str) -> list[dict[str, Any]]:
         """Load a JSONL file and return all records.

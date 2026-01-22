@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -37,7 +38,7 @@ class RunSummary:
     started_at: datetime
     completed_at: datetime | None
     stats: RunStats
-    failures: list[FailurePattern] = None
+    failures: list[FailurePattern] | None = None
 
 
 @dataclass
@@ -60,9 +61,9 @@ class StepObservation:
     status_code: int | None
     latency_ms: float
     headers: dict[str, str]
-    body: dict | list | None
+    body: dict[str, Any] | list[Any] | None
     errors: list[str]
-    turbulence: dict | None = None
+    turbulence: dict[str, Any] | None = None
 
 
 @dataclass
@@ -84,7 +85,7 @@ class InstanceDetail:
     scenario_id: str
     passed: bool | None
     duration_ms: float
-    entry: dict
+    entry: dict[str, Any]
     steps: list[Step]
 
 
@@ -223,7 +224,7 @@ class ArtifactReaderService:
 
         # Find instance in instances.jsonl
         instances_path = run_path / "instances.jsonl"
-        instance_data: dict | None = None
+        instance_data: dict[str, Any] | None = None
 
         if instances_path.exists():
             with instances_path.open() as f:

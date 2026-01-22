@@ -1,6 +1,7 @@
 """Routes for run management."""
 
 from dataclasses import asdict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
@@ -18,7 +19,7 @@ def get_reader(request: Request) -> ArtifactReaderService:
 def list_runs(
     request: Request,
     limit: int = Query(default=50, ge=1, le=100),
-) -> dict:
+) -> dict[str, Any]:
     """List all available runs.
 
     Args:
@@ -34,7 +35,7 @@ def list_runs(
 
 
 @router.get("/runs/{run_id}")
-def get_run(request: Request, run_id: str) -> dict:
+def get_run(request: Request, run_id: str) -> dict[str, Any]:
     """Get details for a specific run.
 
     Args:
@@ -61,7 +62,7 @@ def list_instances(
     status: str | None = Query(default=None, pattern="^(passed|failed|errors)$"),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=50, ge=1, le=100),
-) -> dict:
+) -> dict[str, Any]:
     """List instances for a run.
 
     Args:
@@ -80,7 +81,7 @@ def list_instances(
 
 
 @router.get("/runs/{run_id}/instances/{instance_id}")
-def get_instance(request: Request, run_id: str, instance_id: str) -> dict:
+def get_instance(request: Request, run_id: str, instance_id: str) -> dict[str, Any]:
     """Get detailed information for a specific instance.
 
     Args:

@@ -204,6 +204,10 @@ class AssertActionRunner:
         elif isinstance(scenario_path, str):
             base_path = Path(scenario_path)
 
+        # json_schema is guaranteed to exist when this method is called
+        if expect.json_schema is None:
+            raise ValueError("json_schema must be set for schema validation")
+
         try:
             validate_json_schema(
                 body,
@@ -239,6 +243,10 @@ class AssertActionRunner:
         last_response = context.get("last_response", {})
         body = last_response.get("body")
         headers = last_response.get("headers", {})
+
+        # expression is guaranteed to exist when this method is called
+        if expect.expression is None:
+            raise ValueError("expression must be set for expression evaluation")
 
         try:
             result = self._expression_evaluator.evaluate(

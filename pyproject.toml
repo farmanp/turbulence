@@ -109,3 +109,15 @@ disallow_untyped_defs = true
 check_untyped_defs = true
 show_error_codes = true
 warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "yaml",
+    "jsonpath_ng",
+    "jsonpath_ng.exceptions",
+    "jsonschema",
+    "jsonschema.validators",
+    "referencing",
+    "referencing.jsonschema",
+]
+ignore_missing_imports = true

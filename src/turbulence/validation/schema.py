@@ -43,7 +43,9 @@ def validate_json_schema(
         raise SchemaValidationError(f"Invalid JSON Schema: {exc}") from exc
 
     base_dir = None
-    registry = Registry(retrieve=lambda uri: _retrieve_resource(uri, base_dir))
+    registry: Registry[Resource[dict[str, Any]]] = Registry(  # type: ignore[call-arg]
+        retrieve=lambda uri: _retrieve_resource(uri, base_dir)
+    )
     if base_path is not None:
         base_dir = base_path if base_path.is_dir() else base_path.parent
         base_uri = base_dir.resolve().as_uri()
@@ -54,7 +56,10 @@ def validate_json_schema(
             schema_with_id = {**schema, "$id": base_uri}
         registry = registry.with_resource(
             base_uri,
-            Resource.from_contents(schema_with_id, default_specification=DRAFT7),
+            Resource.from_contents(
+                schema_with_id,  # type: ignore[arg-type]
+                default_specification=DRAFT7,
+            ),
         )
 
     validator = validator_cls(schema, registry=registry)

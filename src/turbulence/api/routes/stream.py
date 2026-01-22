@@ -3,6 +3,7 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
@@ -10,7 +11,9 @@ from starlette.websockets import WebSocketState
 router = APIRouter(tags=["streaming"])
 
 
-async def tail_jsonl(file_path: Path, last_position: int = 0) -> tuple[list[dict], int]:
+def tail_jsonl(
+    file_path: Path, last_position: int = 0
+) -> tuple[list[dict[str, Any]], int]:
     """Read new lines from a JSONL file since last position.
 
     Args:
@@ -20,7 +23,7 @@ async def tail_jsonl(file_path: Path, last_position: int = 0) -> tuple[list[dict
     Returns:
         Tuple of (new entries, new position).
     """
-    entries = []
+    entries: list[dict[str, Any]] = []
     if not file_path.exists():
         return entries, last_position
 
@@ -38,7 +41,7 @@ async def tail_jsonl(file_path: Path, last_position: int = 0) -> tuple[list[dict
     return entries, new_position
 
 
-def compute_stats(entries: list[dict]) -> dict:
+def compute_stats(entries: list[dict[str, Any]]) -> dict[str, Any]:
     """Compute run statistics from instance entries.
 
     Args:
@@ -89,7 +92,7 @@ async def stream_run(websocket: WebSocket, run_id: str) -> None:
         return
 
     last_position = 0
-    all_entries: list[dict] = []
+    all_entries: list[dict[str, Any]] = []
     heartbeat_interval = 5.0
     poll_interval = 0.5
     last_heartbeat = asyncio.get_event_loop().time()

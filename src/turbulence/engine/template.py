@@ -57,9 +57,6 @@ class TemplateEngine:
         Raises:
             TemplateError: If a variable is missing or template is invalid
         """
-        if not isinstance(template, str):
-            return template
-
         # Check if this is purely a single variable reference
         if self.SINGLE_VAR_PATTERN.match(template.strip()):
             # Extract the variable path

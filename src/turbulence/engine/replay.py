@@ -227,24 +227,24 @@ class ReplayEngine:
             raise ValueError("SUT config is required for replay execution")
 
         if isinstance(rendered_action, HttpAction):
-            runner = HttpActionRunner(
+            http_runner = HttpActionRunner(
                 action=rendered_action,
                 sut_config=self.sut_config,
                 client=client,
             )
-            return await runner.execute(context)
-        elif isinstance(rendered_action, WaitAction):
-            runner = WaitActionRunner(
+            return await http_runner.execute(context)
+        if isinstance(rendered_action, WaitAction):
+            wait_runner = WaitActionRunner(
                 action=rendered_action,
                 sut_config=self.sut_config,
                 client=client,
             )
-            return await runner.execute(context)
-        elif isinstance(rendered_action, AssertAction):
-            runner = AssertActionRunner(action=rendered_action)
-            return await runner.execute(context)
-        else:
-            raise ValueError(f"Unknown action type: {type(action)}")
+            return await wait_runner.execute(context)
+        if isinstance(rendered_action, AssertAction):
+            assert_runner = AssertActionRunner(action=rendered_action)
+            return await assert_runner.execute(context)
+
+        raise ValueError(f"Unknown action type: {type(action)}")
 
     def _render_action(self, action: Action, context: dict[str, Any]) -> Action:
         """Render template variables in an action.
@@ -262,12 +262,10 @@ class ReplayEngine:
 
         if isinstance(action, HttpAction):
             return HttpAction(**rendered_dict)
-        elif isinstance(action, WaitAction):
+        if isinstance(action, WaitAction):
             return WaitAction(**rendered_dict)
-        elif isinstance(action, AssertAction):
-            return AssertAction(**rendered_dict)
-        else:
-            return action
+        # AssertAction is the only remaining possibility
+        return AssertAction(**rendered_dict)
 
     def _compare_observations(
         self,
