@@ -281,40 +281,6 @@ class TestReplayEngine:
         assert has_diff is False
         assert details is None
 
-    @pytest.mark.asyncio
-    async def test_execute_step_http_action(
-        self, temp_runs_dir: Path, sut_config: SUTConfig
-    ) -> None:
-        """Test executing an HTTP action step."""
-        engine = ReplayEngine(
-            runs_dir=temp_runs_dir,
-            sut_config=sut_config,
-        )
-        action = HttpAction(
-            name="test-action",
-            service="api",
-            method="GET",
-            path="/users/123",
-        )
-        context = {"user_id": 123}
-
-        mock_response = httpx.Response(
-            status_code=200,
-            json={"id": 123, "name": "Test User"},
-            headers={"Content-Type": "application/json"},
-        )
-
-        with patch.object(
-            httpx.AsyncClient,
-            "request",
-            new_callable=AsyncMock,
-            return_value=mock_response,
-        ):
-            observation, updated_context = await engine.execute_step(action, context)
-
-        assert observation.ok is True
-        assert observation.status_code == 200
-        assert observation.action_name == "test-action"
 
     @pytest.mark.asyncio
     async def test_replay_full_execution(

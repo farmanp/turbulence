@@ -12,16 +12,11 @@ import typer
 from rich.console import Console
 
 from turbulence.actions.assert_ import AssertActionRunner
-from turbulence.actions.http import HttpActionRunner
-from turbulence.actions.wait import WaitActionRunner
 from turbulence.config.loader import load_scenarios, load_sut
 from turbulence.config.scenario import (
-    Action,
     AssertAction,
     Assertion,
-    HttpAction,
     Scenario,
-    WaitAction,
 )
 from turbulence.config.sut import SUTConfig
 from turbulence.engine.context import WorkflowContext
@@ -30,6 +25,7 @@ from turbulence.engine.executor import (
     InstanceResult,
     ParallelExecutor,
 )
+from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
 from turbulence.models.assertion_result import AssertionResult
 from turbulence.models.manifest import RunConfig
@@ -175,20 +171,17 @@ async def _run_instances(
         passed = True
         error: str | None = None
 
+        scenario_runner = ScenarioRunner(
+            template_engine=template_engine,
+            sut_config=instance_sut,
+            turbulence_engine=turbulence_engine,
+        )
+
         try:
             async with httpx.AsyncClient() as client:
-                for step_index, action in enumerate(scenario.flow):
-                    observation, context_dict = await _execute_action(
-                        action=action,
-                        context=context_dict,
-                        sut_config=instance_sut,
-                        template_engine=template_engine,
-                        client=client,
-                        turbulence_engine=turbulence_engine,
-                    )
-                    if isinstance(action, (HttpAction, WaitAction)):
-                        _update_last_response(context_dict, observation)
-
+                async for step_index, action, observation, context_dict in scenario_runner.execute_flow(
+                    scenario, context_dict, client
+                ):
                     artifact_store.write_step(
                         instance_id=ctx.instance_id,
                         correlation_id=ctx.correlation_id,
@@ -209,8 +202,6 @@ async def _run_instances(
 
                     if not observation.ok:
                         passed = False
-                        if scenario.stop_when.any_action_fails:
-                            break
 
                 final_offset = len(scenario.flow)
                 for assertion_index, assertion in enumerate(scenario.assertions):
@@ -282,49 +273,6 @@ def _pick_scenario(
     return rng.choice(scenarios)
 
 
-async def _execute_action(
-    *,
-    action: Action,
-    context: dict[str, Any],
-    sut_config: SUTConfig,
-    template_engine: TemplateEngine,
-    client: httpx.AsyncClient,
-    turbulence_engine: TurbulenceEngine,
-) -> tuple[Observation, dict[str, Any]]:
-    rendered_action = _render_action(action, context, template_engine)
-
-    if isinstance(rendered_action, HttpAction):
-        runner = HttpActionRunner(
-            action=rendered_action,
-            sut_config=sut_config,
-            client=client,
-        )
-        policy = turbulence_engine.resolve_policy(
-            service=rendered_action.service,
-            action=rendered_action.name,
-        )
-        if policy is not None:
-            return await turbulence_engine.apply(
-                policy=policy,
-                action_name=rendered_action.name,
-                service_name=rendered_action.service,
-                instance_id=str(context.get("instance_id", "")),
-                context=context,
-                execute=lambda: runner.execute(context),
-            )
-        return await runner.execute(context)
-    if isinstance(rendered_action, WaitAction):
-        wait_runner = WaitActionRunner(
-            action=rendered_action,
-            sut_config=sut_config,
-            client=client,
-        )
-        return await wait_runner.execute(context)
-    if isinstance(rendered_action, AssertAction):
-        assert_runner = AssertActionRunner(action=rendered_action)
-        return await assert_runner.execute(context)
-
-    raise ValueError(f"Unknown action type: {type(action)}")
 
 
 async def _execute_assertion(
@@ -333,40 +281,19 @@ async def _execute_assertion(
     context: dict[str, Any],
     template_engine: TemplateEngine,
 ) -> tuple[Observation, dict[str, Any]]:
+    """Execute a final assertion (not part of the flow)."""
     assert_action = AssertAction(
         name=assertion.name,
         type="assert",
         expect=assertion.expect,
     )
-    rendered_action = _render_action(assert_action, context, template_engine)
-    if not isinstance(rendered_action, AssertAction):
-        raise TypeError("Expected AssertAction after rendering")
+    # Render templates inline
+    action_dict = assert_action.model_dump()
+    rendered_dict = template_engine.render_dict(action_dict, context)
+    rendered_action = AssertAction(**rendered_dict)
+    
     runner = AssertActionRunner(action=rendered_action)
     return await runner.execute(context)
-
-
-def _render_action(
-    action: Action,
-    context: dict[str, Any],
-    template_engine: TemplateEngine,
-) -> Action:
-    action_dict = action.model_dump()
-    rendered_dict = template_engine.render_dict(action_dict, context)
-
-    if isinstance(action, HttpAction):
-        return HttpAction(**rendered_dict)
-    if isinstance(action, WaitAction):
-        return WaitAction(**rendered_dict)
-    # AssertAction is the only remaining possibility
-    return AssertAction(**rendered_dict)
-
-
-def _update_last_response(context: dict[str, Any], observation: Observation) -> None:
-    context["last_response"] = {
-        "status_code": getattr(observation, "status_code", None),
-        "headers": getattr(observation, "headers", {}),
-        "body": getattr(observation, "body", None),
-    }
 
 
 def _write_assertion(

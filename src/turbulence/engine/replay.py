@@ -8,17 +8,14 @@ from typing import Any
 import httpx
 
 from turbulence.actions.assert_ import AssertActionRunner
-from turbulence.actions.http import HttpActionRunner
-from turbulence.actions.wait import WaitActionRunner
 from turbulence.config.scenario import (
-    Action,
     AssertAction,
-    HttpAction,
+    Assertion,
     Scenario,
-    WaitAction,
 )
 from turbulence.config.sut import SUTConfig
 from turbulence.engine.context import WorkflowContext
+from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
 from turbulence.models.observation import Observation
 
@@ -204,68 +201,7 @@ class ReplayEngine:
         ctx.set_entry(instance_data.entry)
         return ctx
 
-    async def execute_step(
-        self,
-        action: Action,
-        context: dict[str, Any],
-        client: httpx.AsyncClient | None = None,
-    ) -> tuple[Observation, dict[str, Any]]:
-        """Execute a single workflow step.
-
-        Args:
-            action: The action to execute.
-            context: Current execution context.
-            client: Optional HTTP client to use.
-
-        Returns:
-            Tuple of (Observation, updated_context).
-        """
-        # Render templates in action
-        rendered_action = self._render_action(action, context)
-
-        if self.sut_config is None:
-            raise ValueError("SUT config is required for replay execution")
-
-        if isinstance(rendered_action, HttpAction):
-            http_runner = HttpActionRunner(
-                action=rendered_action,
-                sut_config=self.sut_config,
-                client=client,
-            )
-            return await http_runner.execute(context)
-        if isinstance(rendered_action, WaitAction):
-            wait_runner = WaitActionRunner(
-                action=rendered_action,
-                sut_config=self.sut_config,
-                client=client,
-            )
-            return await wait_runner.execute(context)
-        if isinstance(rendered_action, AssertAction):
-            assert_runner = AssertActionRunner(action=rendered_action)
-            return await assert_runner.execute(context)
-
-        raise ValueError(f"Unknown action type: {type(action)}")
-
-    def _render_action(self, action: Action, context: dict[str, Any]) -> Action:
-        """Render template variables in an action.
-
-        Args:
-            action: The action with template variables.
-            context: Context for template rendering.
-
-        Returns:
-            Action with templates rendered.
-        """
-        # Convert to dict, render, and reconstruct
-        action_dict = action.model_dump()
-        rendered_dict = self.template_engine.render_dict(action_dict, context)
-
-        if isinstance(action, HttpAction):
-            return HttpAction(**rendered_dict)
-        if isinstance(action, WaitAction):
-            return WaitAction(**rendered_dict)
-        # AssertAction is the only remaining possibility
-        return AssertAction(**rendered_dict)
+        return ctx
 
     def _compare_observations(
         self,
@@ -353,28 +289,25 @@ class ReplayEngine:
         if self.sut_config is not None:
             self.sut_config.default_headers["X-Correlation-ID"] = ctx.correlation_id
 
+        scenario_runner = ScenarioRunner(
+            template_engine=self.template_engine,
+            sut_config=self.sut_config,
+            turbulence_engine=None,  # No turbulence in replay
+        )
+
         steps: list[StepResult] = []
         success = True
 
         async with httpx.AsyncClient() as client:
-            for step_num, action in enumerate(scenario.flow, start=1):
+            async for step_index, action, observation, context_dict in scenario_runner.execute_flow(
+                scenario, context_dict, client
+            ):
+                step_num = step_index + 1
+
                 # Get original result if available
                 original_obs = None
-                if step_num <= len(instance_data.original_results):
-                    original_obs = instance_data.original_results[step_num - 1]
-
-                try:
-                    observation, context_dict = await self.execute_step(
-                        action, context_dict, client
-                    )
-                except Exception as e:
-                    observation = Observation(
-                        ok=False,
-                        latency_ms=0.0,
-                        action_name=action.name,
-                        errors=[str(e)],
-                    )
-                    success = False
+                if step_index < len(instance_data.original_results):
+                    original_obs = instance_data.original_results[step_index]
 
                 # Compare with original
                 has_diff, diff_details = self._compare_observations(
@@ -394,8 +327,6 @@ class ReplayEngine:
 
                 if not observation.ok:
                     success = False
-                    if scenario.stop_when.any_action_fails:
-                        break
 
         return ReplayResult(
             instance_id=instance_id,
