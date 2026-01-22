@@ -190,6 +190,7 @@ npm run docs:build        # Build static site
 - Results Explorer (Filtering, Comparison, Export)
 - Python DSL Research (Design Spike)
 - Multi-protocol transport research (Design Spike)
+- LLM-driven actor behavior research (Design Spike)
 
 **Upcoming:**
 - Batch 6: Variation engine (FEAT-017)

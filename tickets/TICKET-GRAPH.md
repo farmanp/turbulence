@@ -184,12 +184,12 @@ Execute each batch to completion before starting the next. Within a batch, all t
 
 ---
 
-### Batch 7: Advanced Engine [PARTIALLY DONE]
+### Batch 7: Advanced Engine [DONE]
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-018 | SQLite backend for run storage | FEAT-008 | Medium | DONE |
 | FEAT-019 | Branching flows and actor policies | FEAT-007, FEAT-006 | High | DONE |
-| SPIKE-001 | LLM-driven actor policy research | FEAT-017, FEAT-019 | Research | TODO |
+| SPIKE-001 | LLM-driven actor policy research | FEAT-017, FEAT-019 | Research | DONE |
 | SPIKE-002 | Python DSL for scenarios | FEAT-003 | Medium | DONE |
 | SPIKE-003 | Multi-protocol transport architecture | FEAT-007, FEAT-008 | Research | DONE |
 
