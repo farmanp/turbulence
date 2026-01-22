@@ -54,7 +54,7 @@ A | B    : A and B can run in parallel (no dependency)
                     ┌───────┴────────────┬───────┴────────────┐
                     │                    │                    │
                     ▼                    ▼                    ▼
-               FEAT-015             FEAT-016             FEAT-017
+               FEAT-015             FEAT-016             FEAT-017 [DONE]
               (Reports)            (CI Gate)           (Variation)
                     │                    │                    │
                     └───────┬────────────┴───────┬────────────┘
@@ -170,12 +170,12 @@ Execute each batch to completion before starting the next. Within a batch, all t
 
 ---
 
-### Batch 6: Polish & CI
+### Batch 6: Polish & CI [DONE]
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-015 | Enhanced report aggregations | FEAT-009, FEAT-011 | Medium | DONE |
 | FEAT-016 | CI gating with fail-on thresholds | FEAT-011 | Low | DONE |
-| FEAT-017 | Deterministic variation engine | FEAT-007 | Medium | TODO |
+| FEAT-017 | Deterministic variation engine | FEAT-007 | Medium | DONE |
 
 **Batch Notes:**
 - FEAT-015 needs basic reports + parallel execution data
@@ -214,7 +214,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 ### Batch 9: Web UI Enhancements
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
-| FEAT-026 | Run Dashboard Live Progress | FEAT-025 | Medium | TODO |
+| FEAT-026 | Run Dashboard Live Progress | FEAT-025 | Medium | DONE |
 | FEAT-027 | Scenario Visualizer | FEAT-021 | High | TODO |
 | FEAT-028 | Quick Run Launcher | FEAT-021, FEAT-027 | High | TODO |
 | FEAT-029 | Results Explorer | FEAT-023 | Medium | TODO |
@@ -314,5 +314,5 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 
 ## AI Agent Status
 
-Turbulence core and Web UI foundation are stable. CI gating is implemented.
+Turbulence core and Web UI foundation are stable. Live progress dashboard is implemented.
 **Current Frontier:** Polish & CI (Batch 6), Advanced Engine (Batch 7), Web UI Enhancements (Batch 9), and Deterministic Variation (FEAT-017).

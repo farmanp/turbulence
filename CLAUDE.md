@@ -184,11 +184,12 @@ npm run docs:build        # Build static site
 - Environment profiles
 - Retry policies
 - CI gating with thresholds
+- Live progress dashboard
 
 **Upcoming:**
 - Batch 6: Variation engine (FEAT-017)
 - Batch 7: SQLite backend (FEAT-018), Branching flows (FEAT-019), Multi-protocol research (SPIKE-003)
-- Batch 9: Web UI enhancements (FEAT-026-029)
+- Batch 9: Web UI enhancements (FEAT-027-029)
 
 See `tickets/TICKET-GRAPH.md` for full roadmap with 32 feature tickets across 10 batches.
 
