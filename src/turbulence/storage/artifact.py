@@ -17,6 +17,7 @@ from turbulence.models.manifest import (
 )
 from turbulence.models.observation import Observation
 from turbulence.storage.jsonl import JSONLWriter
+from turbulence.utils.stats import calculate_percentile
 
 
 class ArtifactStore:
@@ -83,6 +84,7 @@ class ArtifactStore:
         self._total_assertions = 0
         self._assertions_passed = 0
         self._assertions_failed = 0
+        self._latencies: list[float] = []
         self._is_initialized = False
         self._write_lock = threading.Lock()
 
@@ -246,6 +248,10 @@ class ArtifactStore:
         else:
             obs_dict = observation
 
+        latency = obs_dict.get("latency_ms")
+        if latency is not None and isinstance(latency, (int, float)):
+            self._latencies.append(float(latency))
+
         record = StepRecord(
             instance_id=instance_id,
             run_id=self._run_id,
@@ -405,6 +411,9 @@ class ArtifactStore:
             total_assertions=self._total_assertions,
             assertions_passed=self._assertions_passed,
             assertions_failed=self._assertions_failed,
+            p50_latency_ms=calculate_percentile(self._latencies, 50),
+            p95_latency_ms=calculate_percentile(self._latencies, 95),
+            p99_latency_ms=calculate_percentile(self._latencies, 99),
         )
 
         with self._summary_path.open("w", encoding="utf-8") as f:

@@ -64,6 +64,13 @@ class TestRunCommand:
         output = strip_ansi(result.stdout)
         assert "--profile" in output
 
+    def test_run_fail_on_option(self) -> None:
+        """Run command shows --fail-on option in help."""
+        result = runner.invoke(app, ["run", "--help"])
+        assert result.exit_code == 0
+        output = strip_ansi(result.stdout)
+        assert "--fail-on" in output
+
 
 class TestProfilesCommand:
     """Test the profiles command."""

@@ -267,3 +267,15 @@ class RunSummary(BaseModel):
         default=0,
         description="Number of assertions that failed",
     )
+    p50_latency_ms: float = Field(
+        default=0.0,
+        description="50th percentile (median) latency of all actions",
+    )
+    p95_latency_ms: float = Field(
+        default=0.0,
+        description="95th percentile latency of all actions",
+    )
+    p99_latency_ms: float = Field(
+        default=0.0,
+        description="99th percentile latency of all actions",
+    )

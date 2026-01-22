@@ -27,8 +27,11 @@ from turbulence.engine.executor import (
 )
 from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
+from turbulence.variation.engine import VariationEngine
+from turbulence.gating import Threshold, ThresholdError
 from turbulence.models.assertion_result import AssertionResult
 from turbulence.models.manifest import RunConfig
+
 from turbulence.models.observation import Observation
 from turbulence.pressure.engine import TurbulenceEngine
 from turbulence.storage.artifact import ArtifactStore
@@ -89,6 +92,11 @@ def run(
         help="Directory to store run artifacts",
         resolve_path=True,
     ),
+    fail_on: list[str] = typer.Option(
+        None,
+        "--fail-on",
+        help="Fail pipeline if threshold exceeded (e.g. 'pass_rate<99', 'p95_latency_ms>500')",
+    ),
 ) -> None:
     """Execute workflow simulations against the system under test.
 
@@ -108,6 +116,7 @@ def run(
             seed=seed,
             profile=profile,
             output_dir=output_dir,
+            fail_on=fail_on,
         )
     )
     raise typer.Exit(code=exit_code)
@@ -122,7 +131,18 @@ async def _run_instances(
     seed: int | None,
     profile: str | None,
     output_dir: Path,
+    fail_on: list[str] | None,
 ) -> int:
+    # Parse thresholds early to fail fast
+    thresholds: list[Threshold] = []
+    if fail_on:
+        for t_str in fail_on:
+            try:
+                thresholds.append(Threshold.parse(t_str))
+            except ThresholdError as e:
+                console.print(f"[bold red]Configuration Error:[/bold red] {e}")
+                return 1
+
     sut_config = load_sut(sut, profile=profile)
     scenario_list = load_scenarios(scenarios_dir)
     seed_value = seed if seed is not None else random.SystemRandom().randint(1, 2**31)
@@ -156,11 +176,31 @@ async def _run_instances(
     async def execute_instance(instance_index: int) -> InstanceResult:
         scenario = _pick_scenario(scenario_list, seed_value, instance_index)
         entry_data = scenario.entry.model_dump()
+
+        # Apply variations if configured
+        variations_applied = {}
+        if scenario.variation:
+            variation_engine = VariationEngine(scenario.variation, seed_value)
+            variations_applied = variation_engine.apply(instance_index)
+
+            # Inject into entry seed_data under 'variation' namespace
+            if "seed_data" not in entry_data:
+                entry_data["seed_data"] = {}
+            entry_data["seed_data"]["variation"] = variations_applied
+
         ctx = WorkflowContext.from_scenario_entry(entry_data, run_id=run_id)
         context_dict = ctx.to_dict()
 
         if scenario.source_path is not None:
             context_dict["_scenario_path"] = scenario.source_path
+
+        # Log applied variations to artifact store
+        if variations_applied:
+            artifact_store.write_instance_artifact(
+                instance_id=ctx.instance_id,
+                filename="variation.json",
+                data=variations_applied,
+            )
 
         instance_sut = sut_config.model_copy(deep=True)
         instance_sut.default_headers["X-Correlation-ID"] = ctx.correlation_id
@@ -259,9 +299,27 @@ async def _run_instances(
     try:
         await executor.execute(instances, execute_instance)
     finally:
-        artifact_store.finalize()
+        summary = artifact_store.finalize()
 
     executor.print_summary()
+
+    # Evaluate thresholds
+    if thresholds:
+        console.print()
+        console.print("[bold blue]Quality Gates[/bold blue]")
+        failed_thresholds = 0
+        for t in thresholds:
+            passed, _, msg = t.evaluate(summary)
+            if passed:
+                console.print(f"  [green]✓ {msg}[/green]")
+            else:
+                console.print(f"  [bold red]✗ {msg}[/bold red]")
+                failed_thresholds += 1
+        
+        if failed_thresholds > 0:
+            console.print(f"\n[bold red]Build failed: {failed_thresholds} threshold(s) violated[/bold red]")
+            return 2
+
     return 0
 
 
