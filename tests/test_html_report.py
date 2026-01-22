@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from windtunnel.report import HTMLReportGenerator
-from windtunnel.report.html import ReportData, ScenarioStats
+from turbulence.report import HTMLReportGenerator
+from turbulence.report.html import ReportData, ScenarioStats
 
 
 class TestScenarioStats:

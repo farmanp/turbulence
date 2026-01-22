@@ -2,8 +2,8 @@
 
 from typer.testing import CliRunner
 
-from windtunnel import __version__
-from windtunnel.cli import app
+from turbulence import __version__
+from turbulence.cli import app
 
 runner = CliRunner()
 

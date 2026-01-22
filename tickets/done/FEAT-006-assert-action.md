@@ -11,7 +11,7 @@ Named assertions that evaluate expectations against context/responses and report
 
 ## 2. Context & Constraints (Required)
 **Background:**
-Assertions are how Windtunnel validates that workflows produce correct results. Unlike test frameworks that stop on first failure, Windtunnel assertions are observations that contribute to pass rate metrics. Clear assertion naming and detailed failure messages are critical for debugging.
+Assertions are how Turbulence validates that workflows produce correct results. Unlike test frameworks that stop on first failure, Turbulence assertions are observations that contribute to pass rate metrics. Clear assertion naming and detailed failure messages are critical for debugging.
 
 **Scope:**
 - **In Scope:** Status code assertions, JSONPath equals/contains, named assertions, pass/fail reporting
@@ -65,9 +65,9 @@ Then the assertion passes
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/actions/assert_.py (underscore to avoid keyword)
-- Update src/windtunnel/actions/__init__.py to register assert runner
-- Create src/windtunnel/models/assertion_result.py
+- Create src/turbulence/actions/assert_.py (underscore to avoid keyword)
+- Update src/turbulence/actions/__init__.py to register assert runner
+- Create src/turbulence/models/assertion_result.py
 
 **Must NOT Change:**
 - HTTP/Wait action implementations

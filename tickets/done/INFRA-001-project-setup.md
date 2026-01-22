@@ -2,7 +2,7 @@
 
 ## 1. Objective (Required)
 **What:**
-Initialize the Windtunnel Python project with proper package structure, dependencies, and development tooling.
+Initialize the Turbulence Python project with proper package structure, dependencies, and development tooling.
 
 **Why:**
 This establishes the foundation for all subsequent development. A well-structured project with proper tooling enables efficient development, testing, and CI/CD from day one.
@@ -10,7 +10,7 @@ This establishes the foundation for all subsequent development. A well-structure
 ## 2. Scope (Required)
 **In Scope:**
 - Create pyproject.toml with all core dependencies
-- Set up src/windtunnel/ package structure
+- Set up src/turbulence/ package structure
 - Configure pytest for testing
 - Set up GitHub Actions CI workflow
 - Configure development tools (ruff, mypy)
@@ -26,8 +26,8 @@ Use modern Python packaging with pyproject.toml (PEP 621). Follow src-layout for
 
 **Files to Create:**
 - `pyproject.toml` - Project metadata and dependencies
-- `src/windtunnel/__init__.py` - Package root
-- `src/windtunnel/py.typed` - PEP 561 marker
+- `src/turbulence/__init__.py` - Package root
+- `src/turbulence/py.typed` - PEP 561 marker
 - `tests/__init__.py` - Test package
 - `tests/conftest.py` - Pytest fixtures
 - `.github/workflows/ci.yml` - CI workflow
@@ -50,7 +50,7 @@ Dev:
 
 ## 4. Acceptance Criteria (Required)
 - [ ] `pip install -e .` succeeds from project root
-- [ ] `python -c "import windtunnel"` works
+- [ ] `python -c "import turbulence"` works
 - [ ] `pytest` runs (even with no tests yet)
 - [ ] `ruff check src/` passes
 - [ ] `mypy src/` passes

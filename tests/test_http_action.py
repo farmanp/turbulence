@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from windtunnel.actions.http import HttpActionRunner
-from windtunnel.config.scenario import HttpAction
-from windtunnel.config.sut import Service, SUTConfig
-from windtunnel.models.observation import Observation
+from turbulence.actions.http import HttpActionRunner
+from turbulence.config.scenario import HttpAction
+from turbulence.config.sut import Service, SUTConfig
+from turbulence.models.observation import Observation
 
 
 @pytest.fixture

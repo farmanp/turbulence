@@ -64,7 +64,7 @@ And the report loads in a browser within 5 seconds
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Update src/windtunnel/report/html.py
+- Update src/turbulence/report/html.py
 - Update report template with new sections
 - Add percentile calculation utilities
 - Add CSS for timeline visualization

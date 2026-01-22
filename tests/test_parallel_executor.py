@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from windtunnel.engine import ExecutionStats, ParallelExecutor
-from windtunnel.engine.executor import InstanceResult
+from turbulence.engine import ExecutionStats, ParallelExecutor
+from turbulence.engine.executor import InstanceResult
 
 
 @pytest.mark.asyncio

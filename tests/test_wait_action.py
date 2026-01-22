@@ -7,13 +7,13 @@ import httpx
 import pytest
 from pydantic import ValidationError
 
-from windtunnel.actions.wait import (
+from turbulence.actions.wait import (
     PollAttempt,
     WaitActionRunner,
     WaitObservation,
 )
-from windtunnel.config.scenario import Expectation, WaitAction
-from windtunnel.config.sut import Service, SUTConfig
+from turbulence.config.scenario import Expectation, WaitAction
+from turbulence.config.sut import Service, SUTConfig
 
 
 @pytest.fixture

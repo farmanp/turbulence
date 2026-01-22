@@ -6,8 +6,8 @@ from textwrap import dedent
 import pytest
 from pydantic import ValidationError
 
-from windtunnel.config import SUTConfig, load_sut
-from windtunnel.config.loader import ConfigLoadError
+from turbulence.config import SUTConfig, load_sut
+from turbulence.config.loader import ConfigLoadError
 
 
 class TestSUTConfig:

@@ -9,9 +9,9 @@ import httpx
 import pytest
 from typer.testing import CliRunner
 
-from windtunnel.config.scenario import HttpAction
-from windtunnel.config.sut import Service, SUTConfig
-from windtunnel.engine.replay import (
+from turbulence.config.scenario import HttpAction
+from turbulence.config.sut import Service, SUTConfig
+from turbulence.engine.replay import (
     InstanceData,
     InstanceNotFoundError,
     ReplayEngine,
@@ -19,7 +19,7 @@ from windtunnel.engine.replay import (
     ScenarioNotFoundError,
     StepResult,
 )
-from windtunnel.models.observation import Observation
+from turbulence.models.observation import Observation
 
 
 @pytest.fixture
@@ -477,7 +477,7 @@ class TestReplayCommand:
         self, cli_runner: CliRunner, tmp_path: Path
     ) -> None:
         """Test replay with non-existent run."""
-        from windtunnel.cli import app
+        from turbulence.cli import app
 
         runs_dir = tmp_path / "runs"
         runs_dir.mkdir()
@@ -502,7 +502,7 @@ class TestReplayCommand:
         self, cli_runner: CliRunner, temp_runs_dir: Path
     ) -> None:
         """Test replay with non-existent instance."""
-        from windtunnel.cli import app
+        from turbulence.cli import app
 
         result = cli_runner.invoke(
             app,
@@ -524,7 +524,7 @@ class TestReplayCommand:
         self, cli_runner: CliRunner, temp_runs_dir: Path
     ) -> None:
         """Test replay without SUT config shows instance data only."""
-        from windtunnel.cli import app
+        from turbulence.cli import app
 
         result = cli_runner.invoke(
             app,

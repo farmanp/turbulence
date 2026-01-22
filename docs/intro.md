@@ -3,9 +3,9 @@ sidebar_position: 1
 slug: /
 ---
 
-# Windtunnel Docs
+# Turbulence Docs
 
-Windtunnel is a workflow simulation and testing framework for distributed
+Turbulence is a workflow simulation and testing framework for distributed
 systems. You model user journeys in YAML, run them concurrently with the async
 engine, and get JSONL artifacts plus a rich HTML report for analysis.
 
@@ -16,9 +16,9 @@ Use the **User Guide** to get running quickly and author scenarios. The
 
 1. Define a System Under Test (SUT) in YAML.
 2. Create one or more scenario YAML files describing the workflow steps.
-3. Run `windtunnel run` to execute instances and store artifacts under `runs/`.
-4. Generate reports with `windtunnel report` or replay a single instance with
-   `windtunnel replay`.
+3. Run `turbulence run` to execute instances and store artifacts under `runs/`.
+4. Generate reports with `turbulence report` or replay a single instance with
+   `turbulence replay`.
 
 If you are new, start with **User Guide → Getting Started**.
 

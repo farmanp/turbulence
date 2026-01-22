@@ -11,7 +11,7 @@ A complete artifact storage system writing JSONL files with run manifests, insta
 
 ## 2. Context & Constraints (Required)
 **Background:**
-Reproducibility is a core principle of Windtunnel. Every run must produce artifacts that enable exact replay and deep debugging. The storage format must be efficient for streaming writes during execution while remaining human-readable and queryable after completion.
+Reproducibility is a core principle of Turbulence. Every run must produce artifacts that enable exact replay and deep debugging. The storage format must be efficient for streaming writes during execution while remaining human-readable and queryable after completion.
 
 **Scope:**
 - **In Scope:** Directory structure creation, JSONL streaming, manifest.json, instances/steps/assertions files, summary.json
@@ -62,10 +62,10 @@ Then their artifact structures are identical (modulo timestamps)
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/storage/__init__.py
-- Create src/windtunnel/storage/artifact.py
-- Create src/windtunnel/storage/jsonl.py
-- Create src/windtunnel/models/manifest.py
+- Create src/turbulence/storage/__init__.py
+- Create src/turbulence/storage/artifact.py
+- Create src/turbulence/storage/jsonl.py
+- Create src/turbulence/models/manifest.py
 
 **Must NOT Change:**
 - Action runners

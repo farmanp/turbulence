@@ -115,7 +115,7 @@ export function useRunStream(runId: string) {
 ```python
 # api/routes/stream.py
 from fastapi import WebSocket
-from windtunnel.storage.artifact import ArtifactStore
+from turbulence.storage.artifact import ArtifactStore
 
 @router.websocket("/api/runs/{run_id}/stream")
 async def stream_run(websocket: WebSocket, run_id: str):

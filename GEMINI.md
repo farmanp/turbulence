@@ -1,14 +1,14 @@
-# Windtunnel 🌪️
+# Turbulence
 
 A powerful workflow simulation and testing framework designed to stress-test and analyze complex distributed systems through realistic agent-based behavior.
 
 ## 🚀 Overview
 
-Windtunnel allows developers to define system configurations (SUT) and scenarios to simulate high-concurrency, long-running workflows. It provides deep visibility into system performance, failure modes, and recovery behaviors.
+Turbulence allows developers to define system configurations (SUT) and scenarios to simulate high-concurrency, long-running workflows. It provides deep visibility into system performance, failure modes, and recovery behaviors.
 
 ## 🛠 Project Structure
 
-- `src/windtunnel/`: Core package.
+- `src/turbulence/`: Core package.
   - `cli.py`: Typer-based command-line interface.
   - `commands/`: Implementation of `run`, `report`, and `replay` commands.
   - `config/`: Configuration loaders for SUT and Scenarios.

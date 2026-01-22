@@ -11,7 +11,7 @@ pip install -e ".[dev]"
 ## CLI Smoke Test
 
 ```bash
-windtunnel --help
+turbulence --help
 ```
 
 ## Web UI (Vite)
@@ -27,7 +27,7 @@ npm run dev
 Then run the API server:
 
 ```bash
-windtunnel serve --runs-dir runs/ --port 8000
+turbulence serve --runs-dir runs/ --port 8000
 ```
 
 ## Production UI

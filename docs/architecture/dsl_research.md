@@ -1,10 +1,10 @@
-# Research: Python DSL for Windtunnel
+# Research: Python DSL for Turbulence
 
 **Date:** 2026-01-21
 **Related Ticket:** SPIKE-002
 
 ## Objective
-To identify the optimal Python Domain Specific Language (DSL) pattern for Windtunnel. The goal is to improve developer experience (IDE support, type safety) while generating the underlying `Scenario` Pydantic models used by the existing execution engine.
+To identify the optimal Python Domain Specific Language (DSL) pattern for Turbulence. The goal is to improve developer experience (IDE support, type safety) while generating the underlying `Scenario` Pydantic models used by the existing execution engine.
 
 **Constraint:** The DSL must produce static configuration (the `Scenario` model) to be executed by the existing async engine. It should not require a rewrite of the execution engine to support imperative, blocking Python code (like Locust).
 
@@ -16,7 +16,7 @@ A method-chaining approach where operations return the builder instance.
 
 ### Concept
 ```python
-from windtunnel import Scenario, Http, Wait
+from turbulence import Scenario, Http, Wait
 
 # Definition
 checkout_flow = (
@@ -56,7 +56,7 @@ Users write a class or function that *looks* like it's executing code, but it ac
 
 ### Concept
 ```python
-from windtunnel import Scenario, task
+from turbulence import Scenario, task
 
 class CheckoutScenario(Scenario):
     name = "checkout_flow"
@@ -97,7 +97,7 @@ Using Python's `with` statement to define scope and hierarchy.
 
 ### Concept
 ```python
-from windtunnel import Flow, actions
+from turbulence import Flow, actions
 
 with Flow("checkout_flow") as flow:
     

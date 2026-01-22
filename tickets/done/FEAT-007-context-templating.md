@@ -63,8 +63,8 @@ Then a clear error is raised indicating "missing_key" not found
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/engine/context.py
-- Create src/windtunnel/engine/template.py
+- Create src/turbulence/engine/context.py
+- Create src/turbulence/engine/template.py
 - Integrate with action runners to provide context
 
 **Must NOT Change:**

@@ -1,4 +1,4 @@
-"""Pytest fixtures for Windtunnel tests."""
+"""Pytest fixtures for Turbulence tests."""
 
 import pytest
 from typer.testing import CliRunner

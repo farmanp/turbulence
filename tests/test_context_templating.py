@@ -2,7 +2,7 @@
 
 import pytest
 
-from windtunnel.engine import TemplateEngine, TemplateError, WorkflowContext
+from turbulence.engine import TemplateEngine, TemplateError, WorkflowContext
 
 
 class TestTemplateEngineSimpleSubstitution:

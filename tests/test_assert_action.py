@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from windtunnel.actions.assert_ import AssertActionRunner
-from windtunnel.config.scenario import AssertAction, Expectation
-from windtunnel.models.assertion_result import AssertionResult
+from turbulence.actions.assert_ import AssertActionRunner
+from turbulence.config.scenario import AssertAction, Expectation
+from turbulence.models.assertion_result import AssertionResult
 
 
 class TestStatusCodeAssertion:

@@ -11,7 +11,7 @@ A fully functional CLI that accepts commands and options, displays help text, an
 
 ## 2. Context & Constraints (Required)
 **Background:**
-The CLI is the primary interface for Windtunnel. Users will invoke it from terminals and CI pipelines to run simulations, generate reports, and replay specific instances for debugging.
+The CLI is the primary interface for Turbulence. Users will invoke it from terminals and CI pipelines to run simulations, generate reports, and replay specific instances for debugging.
 
 **Scope:**
 - **In Scope:** Command structure, argument parsing, help text, exit codes, version display
@@ -27,23 +27,23 @@ The CLI is the primary interface for Windtunnel. Users will invoke it from termi
 
 **Scenario: Run command accepts required options**
 Given the CLI is installed
-When I run `windtunnel run --help`
+When I run `turbulence run --help`
 Then I see options for --sut, --scenarios, --n, --parallel, --seed
 And each option has descriptive help text
 
 **Scenario: Report command accepts run-id**
 Given the CLI is installed
-When I run `windtunnel report --help`
+When I run `turbulence report --help`
 Then I see --run-id as a required option
 
 **Scenario: Replay command accepts instance identifiers**
 Given the CLI is installed
-When I run `windtunnel replay --help`
+When I run `turbulence replay --help`
 Then I see --run-id and --instance-id options
 
 **Scenario: Version display**
 Given the CLI is installed
-When I run `windtunnel --version`
+When I run `turbulence --version`
 Then I see the current version number
 
 **Scenario: Exit codes are correct**
@@ -57,9 +57,9 @@ Then exit code is 2
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/cli.py
-- Create src/windtunnel/commands/ directory with run.py, report.py, replay.py
-- Update src/windtunnel/__init__.py with version
+- Create src/turbulence/cli.py
+- Create src/turbulence/commands/ directory with run.py, report.py, replay.py
+- Update src/turbulence/__init__.py with version
 - Update pyproject.toml with entry point
 
 **Must NOT Change:**
@@ -77,7 +77,7 @@ If unclear, acceptance criteria override all other sections.
 - [ ] Tests written and passing for CLI argument parsing
 - [ ] Code reviewed
 - [ ] No breaking changes
-- [ ] `windtunnel --help` displays all commands
+- [ ] `turbulence --help` displays all commands
 - [ ] Each command's --help shows relevant options
 
 ## 7. Resources

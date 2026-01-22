@@ -60,8 +60,8 @@ Then the error path shows the full JSON path to the failure
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Update src/windtunnel/actions/assert_.py to add schema validation
-- Create src/windtunnel/validation/schema.py
+- Update src/turbulence/actions/assert_.py to add schema validation
+- Create src/turbulence/validation/schema.py
 - Add jsonschema to dependencies
 
 **Must NOT Change:**

@@ -1,4 +1,4 @@
-# Windtunnel Ticket Dependency Graph
+# Turbulence Ticket Dependency Graph
 
 This document defines ticket dependencies and parallel execution batches for autonomous implementation.
 
@@ -47,7 +47,7 @@ A | B    : A and B can run in parallel (no dependency)
                     │                    │                    │
                     ▼                    ▼                    ▼
                FEAT-011 [DONE]      FEAT-012 [DONE]  FEAT-013 [DONE] | FEAT-014 [DONE]
-            (Parallel Exec)       (Turbulence)     (Schema)      | (Expressions)
+            (Parallel Exec)       (Pressure)     (Schema)      | (Expressions)
                     │                    │                    │
                     └───────┬────────────┴───────┬────────────┘
                             │                    │
@@ -147,7 +147,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
 | FEAT-011 | Parallel execution engine | FEAT-008 | High | DONE |
-| FEAT-012 | Turbulence engine v0 | FEAT-004 | Medium | DONE |
+| FEAT-012 | Pressure engine v0 | FEAT-004 | Medium | DONE |
 | FEAT-013 | Schema validation expectation | FEAT-006 | Low | DONE |
 | FEAT-014 | Custom expression evaluator | FEAT-006 | High | DONE |
 
@@ -194,7 +194,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-024 | Simulation Trace Timeline | FEAT-023 | High | DONE |
 | FEAT-025 | Real-time WebSocket Streaming | FEAT-021, FEAT-024 | High | TODO |
 
-**Batch Notes:** This batch focuses on providing a web-based interface for Windtunnel. FEAT-021 provides the API layer, FEAT-020 sets up the frontend framework, and subsequent tickets build out specific UI components. FEAT-025 is the final piece for real-time updates.
+**Batch Notes:** This batch focuses on providing a web-based interface for Turbulence. FEAT-021 provides the API layer, FEAT-020 sets up the frontend framework, and subsequent tickets build out specific UI components. FEAT-025 is the final piece for real-time updates.
 
 ---
 
@@ -270,5 +270,5 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 
 ## AI Agent Status
 
-Windtunnel core is stable. Focus shifted to Web UI visibility.
+Turbulence core is stable. Focus shifted to Web UI visibility.
 **Current Frontier:** Real-time feedback loop (FEAT-025) and Advanced Engine features (Batch 7).

@@ -1,13 +1,13 @@
 # CLI Reference
 
-Windtunnel exposes four primary commands.
+Turbulence exposes four primary commands.
 
-## `windtunnel run`
+## `turbulence run`
 
 Execute workflow simulations against a SUT.
 
 ```bash
-windtunnel run --sut sut.yaml --scenarios scenarios/ --n 100 --parallel 25
+turbulence run --sut sut.yaml --scenarios scenarios/ --n 100 --parallel 25
 ```
 
 Options:
@@ -19,12 +19,12 @@ Options:
 - `--seed`: Random seed for reproducible runs.
 - `--output, -o`: Output directory for artifacts (default: `runs`).
 
-## `windtunnel report`
+## `turbulence report`
 
 Generate an HTML report from run artifacts.
 
 ```bash
-windtunnel report --run-id run_20240115_001
+turbulence report --run-id run_20240115_001
 ```
 
 Options:
@@ -33,12 +33,12 @@ Options:
 - `--runs-dir, -d`: Directory containing run artifacts (default: `runs`).
 - `--output, -o`: Output path (default: `runs/<run_id>/report.html`).
 
-## `windtunnel replay`
+## `turbulence replay`
 
 Replay a specific instance for debugging.
 
 ```bash
-windtunnel replay --run-id run_20240115_001 --instance-id inst_042
+turbulence replay --run-id run_20240115_001 --instance-id inst_042
 ```
 
 Options:
@@ -50,15 +50,15 @@ Options:
 - `--sut, -s`: SUT config path (optional).
 - `--verbose, -v`: Print per-step details.
 
-## `windtunnel serve`
+## `turbulence serve`
 
 Serve the Web UI and API server.
 
 ```bash
-windtunnel serve --runs-dir runs/ --port 8000
+turbulence serve --runs-dir runs/ --port 8000
 ```
 
-`windtunnel serve` requires `uvicorn` to be installed.
+`turbulence serve` requires `uvicorn` to be installed.
 
 Options:
 

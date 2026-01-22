@@ -1,5 +1,0 @@
-<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Windtunnel">
-  <circle cx="64" cy="64" r="60" fill="#0f6db3"/>
-  <path d="M32 56c16-20 48-28 64-10 6 7 8 16 4 26-6 16-26 26-44 20" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-  <path d="M36 80c12 10 32 12 44 2" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-</svg>

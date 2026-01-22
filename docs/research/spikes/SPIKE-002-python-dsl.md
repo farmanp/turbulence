@@ -5,7 +5,7 @@
 **Recommendation:** Option 2 (Imperative Generator / Proxy Pattern)
 
 ## 1. Executive Summary
-After analyzing the architectural limitations of Windtunnel's current YAML-based configuration, we have decided to implement a Python-based DSL. This DSL will act as a "compiler" that generates the existing `Scenario` Pydantic models. We have selected the **Imperative Generator** pattern (similar to Locust or Pulumi) because it provides the most idiomatic developer experience while solving the core problem of "string-based programming" in configuration files.
+After analyzing the architectural limitations of Turbulence's current YAML-based configuration, we have decided to implement a Python-based DSL. This DSL will act as a "compiler" that generates the existing `Scenario` Pydantic models. We have selected the **Imperative Generator** pattern (similar to Locust or Pulumi) because it provides the most idiomatic developer experience while solving the core problem of "string-based programming" in configuration files.
 
 ## 2. Problem Statement
 The current YAML architecture forces developers to:
@@ -30,7 +30,7 @@ The current YAML architecture forces developers to:
     ```
 *   **Pros:**
     *   **Native Python Syntax:** Users use standard variables for data flow.
-    *   **Proxy Pattern:** The `user` variable in the example above is a "Proxy Object" that automatically serializes to the internal Windtunnel template syntax (e.g., `{{ steps.get_me.json.username }}`).
+    *   **Proxy Pattern:** The `user` variable in the example above is a "Proxy Object" that automatically serializes to the internal Turbulence template syntax (e.g., `{{ steps.get_me.json.username }}`).
     *   **Full IDE Support:** Type hints and "Go to Definition" work out of the box.
 *   **Cons:** Requires a more complex DSL engine to handle lazy-evaluation of variables.
 
@@ -53,7 +53,7 @@ By choosing a "Generator" pattern, we ensure that the DSL only runs *once* at st
 1.  **Phase 1: Proxy Core:** Implement the `ProxyObject` and `DataReference` classes that can track indexing and attribute access.
 2.  **Phase 2: Step Registry:** Create the `Scenario` base class that records calls to `self.http`, `self.wait`, etc.
 3.  **Phase 3: Serializer:** Create the logic to convert the recorded steps into the existing Pydantic `Scenario` model.
-4.  **Phase 4: CLI Integration:** Add a `windtunnel run scenario.py` command that imports the file and executes the generator.
+4.  **Phase 4: CLI Integration:** Add a `turbulence run scenario.py` command that imports the file and executes the generator.
 
 ## 6. Risks & Mitigations
 *   **Risk:** Users might try to use Python `if` or `for` logic that depends on runtime data.

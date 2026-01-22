@@ -28,7 +28,7 @@ While JSONL artifacts enable programmatic analysis, humans need visual reports f
 
 **Scenario: Generate report file**
 Given a completed run with artifacts
-When I run `windtunnel report --run-id <id>`
+When I run `turbulence report --run-id <id>`
 Then report.html is created in the run directory
 
 **Scenario: Display overall pass rate**
@@ -63,9 +63,9 @@ And no external resources are requested
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/report/__init__.py
-- Create src/windtunnel/report/html.py
-- Create src/windtunnel/report/templates/report.html.j2
+- Create src/turbulence/report/__init__.py
+- Create src/turbulence/report/html.py
+- Create src/turbulence/report/templates/report.html.j2
 - Update CLI report command to call report generation
 
 **Must NOT Change:**

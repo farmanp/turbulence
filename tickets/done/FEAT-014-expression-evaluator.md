@@ -71,8 +71,8 @@ Then the result is True
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/evaluation/__init__.py
-- Create src/windtunnel/evaluation/sandbox.py
+- Create src/turbulence/evaluation/__init__.py
+- Create src/turbulence/evaluation/sandbox.py
 - Update assertion evaluation to support expressions
 
 **Must NOT Change:**

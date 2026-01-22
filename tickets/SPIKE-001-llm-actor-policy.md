@@ -39,7 +39,7 @@ Current variation and branching flows require manual rule definition. LLMs could
    - Identify common patterns and pitfalls
 
 2. **Architecture Exploration** (4 hours)
-   - Design integration points in Windtunnel
+   - Design integration points in Turbulence
    - Evaluate: pre-generation vs. real-time vs. hybrid
    - Consider caching and batching strategies
 

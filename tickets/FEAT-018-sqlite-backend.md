@@ -29,7 +29,7 @@ JSONL is excellent for streaming writes and human readability, but becomes slow 
 **Scenario: Create SQLite storage**
 Given --storage sqlite flag
 When a run completes
-Then a windtunnel.db file is created in run directory
+Then a turbulence.db file is created in run directory
 And all instance/step/assertion data is stored
 
 **Scenario: Same data model**
@@ -62,8 +62,8 @@ Then JSONL files are created (not SQLite)
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/storage/sqlite.py
-- Update src/windtunnel/storage/__init__.py with storage factory
+- Create src/turbulence/storage/sqlite.py
+- Update src/turbulence/storage/__init__.py with storage factory
 - Add --storage flag to CLI
 - Create migration utility
 

@@ -1,12 +1,12 @@
-# Windtunnel 🌪️
+# Turbulence
 
 **High-Performance Workflow Simulation & Testing Framework**
 
-Windtunnel is a developer-centric framework designed to stress-test, validate, and analyze complex distributed systems. It combines the ease of writing scenarios in YAML/Python with the raw power of an asynchronous execution engine to simulate thousands of concurrent users.
+Turbulence is a developer-centric framework designed to stress-test, validate, and analyze complex distributed systems. It combines the ease of writing scenarios in YAML/Python with the raw power of an asynchronous execution engine to simulate thousands of concurrent users.
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![GitHub](https://img.shields.io/github/stars/farmanp/windtunnel?style=social)](https://github.com/farmanp/windtunnel)
+[![GitHub](https://img.shields.io/github/stars/farmanp/turbulence?style=social)](https://github.com/farmanp/turbulence)
 
 ---
 
@@ -17,7 +17,7 @@ Windtunnel is a developer-centric framework designed to stress-test, validate, a
 *   **🔍 Deep Observability:** Automatically correlates traces with `run_id`, `instance_id`, and `correlation_id`.
 *   **📊 Rich Reporting:** Generates beautiful HTML reports with pass/fail metrics, latency distributions, and error analysis.
 *   **💾 Crash-Safe Storage:** Persists every step, request, and assertion to efficient JSONL files for post-run analysis.
-*   **🌪️ Turbulence Engine:** Inject fault patterns (latency, errors, timeouts) to test system resilience.
+*   **🔧 Pressure Engine:** Inject fault patterns (latency, errors, timeouts) to test system resilience.
 *   **🖥️ Web Dashboard:** Real-time monitoring UI with run history, instance timelines, and deep investigation views.
 
 ---
@@ -91,7 +91,7 @@ assertions:
 Execute the scenario with 50 concurrent users:
 
 ```bash
-windtunnel run \
+turbulence run \
   --sut sut.yaml \
   --scenarios scenarios/ \
   --parallel 50 \
@@ -102,7 +102,7 @@ windtunnel run \
 Generate and open the HTML report:
 
 ```bash
-windtunnel report --run-id <run_id_from_step_3>
+turbulence report --run-id <run_id_from_step_3>
 open runs/<run_id>/report.html
 ```
 
@@ -110,11 +110,11 @@ open runs/<run_id>/report.html
 
 ## 📂 Project Structure
 
-*   `src/windtunnel/`: Core framework code.
+*   `src/turbulence/`: Core framework code.
     *   `actions/`: Action runners (HTTP, Wait, Assert).
     *   `engine/`: Async execution engine, templating, and replay.
     *   `storage/`: JSONL persistence layer.
-    *   `turbulence/`: Fault injection engine.
+    *   `pressure/`: Fault injection engine.
     *   `validation/`: JSON Schema validation.
     *   `evaluation/`: Safe expression evaluator.
     *   `api/`: FastAPI backend for web dashboard.
@@ -132,7 +132,7 @@ Start the web UI for real-time monitoring:
 
 ```bash
 # Start the API server
-windtunnel serve --port 8000
+turbulence serve --port 8000
 
 # In another terminal, start the UI dev server
 cd ui && npm run dev
@@ -152,8 +152,8 @@ We welcome contributions! Please check `tickets/TICKET-GRAPH.md` to see the road
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/farmanp/windtunnel.git
-    cd windtunnel
+    git clone https://github.com/farmanp/turbulence.git
+    cd turbulence
     ```
 2.  Install dev dependencies: `pip install -e ".[dev]"`
 3.  Run tests: `pytest`
@@ -163,4 +163,4 @@ We welcome contributions! Please check `tickets/TICKET-GRAPH.md` to see the road
 
 ## 📄 License
 
-MIT © 2026 Windtunnel Contributors
+MIT © 2026 Turbulence Contributors

@@ -63,8 +63,8 @@ And no unnecessary waiting occurs
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/actions/wait.py
-- Update src/windtunnel/actions/__init__.py to register wait runner
+- Create src/turbulence/actions/wait.py
+- Update src/turbulence/actions/__init__.py to register wait runner
 
 **Must NOT Change:**
 - HTTP action implementation from FEAT-004

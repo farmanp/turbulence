@@ -6,14 +6,14 @@ from textwrap import dedent
 import pytest
 from pydantic import ValidationError
 
-from windtunnel.config import (
+from turbulence.config import (
     AssertAction,
     HttpAction,
     Scenario,
     WaitAction,
     load_scenarios,
 )
-from windtunnel.config.loader import ConfigLoadError, load_scenario
+from turbulence.config.loader import ConfigLoadError, load_scenario
 
 
 class TestScenarioModel:

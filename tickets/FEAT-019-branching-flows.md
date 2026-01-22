@@ -66,9 +66,9 @@ Then the step executes for premium users
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Update src/windtunnel/engine/executor.py with branching logic
+- Update src/turbulence/engine/executor.py with branching logic
 - Update scenario models to support conditions
-- Create src/windtunnel/engine/conditions.py
+- Create src/turbulence/engine/conditions.py
 
 **Must NOT Change:**
 - Action runner implementations

@@ -17,7 +17,7 @@ export function Layout() {
                             </div>
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold tracking-tight text-white glow-cyan">Windtunnel</h1>
+                            <h1 className="text-xl font-bold tracking-tight text-white glow-cyan">Turbulence</h1>
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-500/60">Stress Intelligence</p>
                         </div>
                     </div>

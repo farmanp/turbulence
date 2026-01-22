@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implement the Run List page as the entry point to the Windtunnel Web UI. Displays all available runs with key metrics in a sortable, filterable table.
+Implement the Run List page as the entry point to the Turbulence Web UI. Displays all available runs with key metrics in a sortable, filterable table.
 
 ## Dependencies
 

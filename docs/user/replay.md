@@ -6,7 +6,7 @@ This is useful for debugging failures or verifying fixes.
 ## Usage
 
 ```bash
-windtunnel replay --run-id run_20240115_001 --instance-id inst_042
+turbulence replay --run-id run_20240115_001 --instance-id inst_042
 ```
 
 Optional flags:

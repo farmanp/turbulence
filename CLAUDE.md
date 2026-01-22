@@ -1,10 +1,10 @@
-# Windtunnel Project Guide
+# Turbulence Project Guide
 
 High-performance workflow simulation and testing framework for distributed systems.
 
 ## Project Overview
 
-Windtunnel enables stress-testing, validation, and analysis of complex distributed systems through:
+Turbulence enables stress-testing, validation, and analysis of complex distributed systems through:
 - Declarative YAML scenarios defining user journeys
 - Async execution engine simulating thousands of concurrent workflows
 - Deep observability with automatic trace correlation
@@ -15,7 +15,7 @@ Windtunnel enables stress-testing, validation, and analysis of complex distribut
 ### Core Components
 
 ```
-src/windtunnel/
+src/turbulence/
 ├── cli.py                    # Typer CLI entry point
 ├── commands/                 # CLI command implementations
 │   ├── run.py               # Execute workflow simulations
@@ -43,8 +43,8 @@ src/windtunnel/
 │   └── sandbox.py           # AST-based safe expression evaluator
 ├── report/                   # Report generation
 │   └── html.py              # HTML report with Jinja2 templates
-├── turbulence/               # Fault injection
-│   ├── config.py            # Turbulence configuration
+├── pressure/                 # Fault injection
+│   ├── config.py            # Pressure configuration
 │   └── engine.py            # Fault pattern application
 ├── api/                      # FastAPI backend
 │   ├── main.py              # FastAPI app setup
@@ -122,10 +122,10 @@ mypy src                  # Type checking
 ### CLI Commands
 
 ```bash
-windtunnel run --sut sut.yaml --scenarios scenarios/ --parallel 10 --count 100
-windtunnel report --run-id <id>
-windtunnel replay --run-id <id> --instance-id <id>
-windtunnel serve --port 8000
+turbulence run --sut sut.yaml --scenarios scenarios/ --parallel 10 --count 100
+turbulence report --run-id <id>
+turbulence replay --run-id <id> --instance-id <id>
+turbulence serve --port 8000
 ```
 
 ## Project Status
@@ -139,7 +139,7 @@ windtunnel serve --port 8000
 - HTML report generation
 - Replay engine
 - Parallel execution engine
-- Turbulence (fault injection)
+- Pressure (fault injection)
 - JSON Schema validation
 - Safe expression evaluator
 - FastAPI backend

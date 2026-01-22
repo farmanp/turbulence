@@ -17,7 +17,7 @@ metadata. These are used to generate HTML reports and replay instances.
 Generate a report from a run:
 
 ```bash
-windtunnel report --run-id <run_id>
+turbulence report --run-id <run_id>
 ```
 
 The HTML file defaults to `runs/<run_id>/report.html`.

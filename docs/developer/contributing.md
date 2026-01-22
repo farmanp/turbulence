@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Windtunnel.
+Thanks for helping improve Turbulence.
 
 ## Workflow
 

@@ -73,7 +73,7 @@ export function ErrorPage() {
                 {/* Footer Decal */}
                 <div className="mt-8 flex justify-center opacity-20 pointer-events-none">
                     <p className="text-[10px] font-black uppercase tracking-[.5em] text-slate-500">
-                        Windtunnel Simulation Engine v1.0
+                        Turbulence Simulation Engine v1.0
                     </p>
                 </div>
             </div>

@@ -56,7 +56,7 @@ max_steps: 50
 
 ## Actions
 
-Windtunnel supports three action types:
+Turbulence supports three action types:
 
 ### HTTP Action
 

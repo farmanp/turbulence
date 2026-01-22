@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-- `src/windtunnel/` contains the library and CLI implementation. Key modules include `actions/`, `commands/`, `config/`, `engine/`, `models/`, `report/`, and `storage/`.
+- `src/turbulence/` contains the library and CLI implementation. Key modules include `actions/`, `commands/`, `config/`, `engine/`, `models/`, `report/`, and `storage/`.
 - `tests/` contains pytest suites and fixtures. Scenario samples live under `tests/fixtures/scenarios/`.
 - `tickets/` holds planning and design notes for features and infra work.
 - Module-level `CLAUDE.md` files document local conventions; skim the nearest one before making changes in that area.
@@ -10,7 +10,7 @@
 ## Build, Test, and Development Commands
 
 - `pip install -e ".[dev]"` installs the package in editable mode with dev tooling.
-- `windtunnel --help` verifies CLI wiring and lists available commands.
+- `turbulence --help` verifies CLI wiring and lists available commands.
 - `pytest tests/` runs the test suite.
 - `ruff check src/ tests/` runs linting.
 - `mypy src/` runs strict type checking.
@@ -32,7 +32,7 @@
 
 - Commit messages follow Conventional Commits patterns seen in history, e.g. `feat: ...` or `feat(engine): ...`.
 - PRs should include: a short summary, testing notes (commands run), and any relevant `tickets/` references.
-- Include screenshots for report/HTML changes (see `src/windtunnel/report/templates/`).
+- Include screenshots for report/HTML changes (see `src/turbulence/report/templates/`).
 
 ## Configuration & Security Notes
 

@@ -11,7 +11,7 @@ Concurrent execution of workflow instances with configurable parallelism, progre
 
 ## 2. Context & Constraints (Required)
 **Background:**
-Windtunnel's value comes from running many workflow instances to surface rare failures. Sequential execution would be impractically slow for meaningful sample sizes. Parallel execution must balance throughput with resource constraints and provide visibility into progress.
+Turbulence's value comes from running many workflow instances to surface rare failures. Sequential execution would be impractically slow for meaningful sample sizes. Parallel execution must balance throughput with resource constraints and provide visibility into progress.
 
 **Scope:**
 - **In Scope:** Async execution with semaphore, --parallel flag, rich progress display, Ctrl+C handling
@@ -60,8 +60,8 @@ And artifact writes don't corrupt
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/engine/executor.py
-- Update src/windtunnel/commands/run.py to use executor
+- Create src/turbulence/engine/executor.py
+- Update src/turbulence/commands/run.py to use executor
 - Add progress display with rich
 
 **Must NOT Change:**

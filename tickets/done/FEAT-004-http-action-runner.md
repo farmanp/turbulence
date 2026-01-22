@@ -11,7 +11,7 @@ HTTP requests executed asynchronously with full observability, supporting method
 
 ## 2. Context & Constraints (Required)
 **Background:**
-HTTP actions are the primary way Windtunnel interacts with services. Each action must capture complete request/response data for debugging and replay, while extracting specified values into the workflow context for use in subsequent steps.
+HTTP actions are the primary way Turbulence interacts with services. Each action must capture complete request/response data for debugging and replay, while extracting specified values into the workflow context for use in subsequent steps.
 
 **Scope:**
 - **In Scope:** Async HTTP execution, all HTTP methods, headers/query/json body, JSONPath extraction, Observation recording
@@ -57,10 +57,10 @@ And observation.errors contains the error details
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/actions/__init__.py
-- Create src/windtunnel/actions/http.py
-- Create src/windtunnel/actions/base.py with ActionRunner protocol
-- Create src/windtunnel/models/observation.py
+- Create src/turbulence/actions/__init__.py
+- Create src/turbulence/actions/http.py
+- Create src/turbulence/actions/base.py with ActionRunner protocol
+- Create src/turbulence/models/observation.py
 
 **Must NOT Change:**
 - Config loading from FEAT-002/FEAT-003

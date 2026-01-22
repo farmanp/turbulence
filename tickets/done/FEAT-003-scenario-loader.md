@@ -4,14 +4,14 @@
 **User Story:**
 As a developer
 I want to define workflow scenarios in YAML
-So that Windtunnel can execute realistic user journeys against my services
+So that Turbulence can execute realistic user journeys against my services
 
 **Success Looks Like:**
 Scenarios loaded from YAML files with validated structure, including entry context, flow steps, and assertions.
 
 ## 2. Context & Constraints (Required)
 **Background:**
-Scenarios are the heart of Windtunnel. Each scenario defines a complete user journey—from initial context through a series of actions to final assertions. Scenarios must be flexible enough to express complex workflows while remaining readable and maintainable.
+Scenarios are the heart of Turbulence. Each scenario defines a complete user journey—from initial context through a series of actions to final assertions. Scenarios must be flexible enough to express complex workflows while remaining readable and maintainable.
 
 **Scope:**
 - **In Scope:** YAML parsing, scenario directory scanning, Pydantic models for Scenario/Action/Assertion, validation
@@ -56,8 +56,8 @@ Then max_steps defaults to a reasonable value (e.g., 100)
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/config/scenario.py with Pydantic models
-- Update src/windtunnel/config/loader.py to add scenario loading
+- Create src/turbulence/config/scenario.py with Pydantic models
+- Update src/turbulence/config/loader.py to add scenario loading
 - Create tests/fixtures/scenarios/ with example files
 
 **Must NOT Change:**

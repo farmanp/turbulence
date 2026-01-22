@@ -21,7 +21,7 @@ pip install -e ".[dev]"
 
 ## Try it now
 
-Don't have an API handy? Run this against [httpbin.org](https://httpbin.org) to see Windtunnel in action immediately.
+Don't have an API handy? Run this against [httpbin.org](https://httpbin.org) to see Turbulence in action immediately.
 
 1. Create a simple SUT config (`httpbin-sut.yaml`):
 
@@ -44,7 +44,7 @@ flow:
     method: POST
     path: /post
     json:
-      message: "Hello Windtunnel"
+      message: "Hello Turbulence"
     extract:
       returned_data: "$.json.message"
 
@@ -52,13 +52,13 @@ assertions:
   - name: verify_echo
     expect:
       jsonpath: "$.json.message"
-      equals: "Hello Windtunnel"
+      equals: "Hello Turbulence"
 ```
 
 3. Run the simulation:
 
 ```bash
-windtunnel run --sut httpbin-sut.yaml --scenarios scenarios/ --n 10
+turbulence run --sut httpbin-sut.yaml --scenarios scenarios/ --n 10
 ```
 
 ## Quick Start
@@ -147,13 +147,13 @@ max_steps: 50
 3. Run the simulation:
 
 ```bash
-windtunnel run --sut sut.yaml --scenarios scenarios/ --n 200 --parallel 25
+turbulence run --sut sut.yaml --scenarios scenarios/ --n 200 --parallel 25
 ```
 
 4. Generate a report:
 
 ```bash
-windtunnel report --run-id <run_id>
+turbulence report --run-id <run_id>
 ```
 
 Artifacts are stored under `runs/<run_id>/` by default.

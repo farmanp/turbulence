@@ -62,9 +62,9 @@ And this enables debugging why a specific instance failed
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/variation/__init__.py
-- Create src/windtunnel/variation/engine.py
-- Create src/windtunnel/variation/config.py
+- Create src/turbulence/variation/__init__.py
+- Create src/turbulence/variation/engine.py
+- Create src/turbulence/variation/config.py
 - Integrate variation with instance creation
 
 **Must NOT Change:**

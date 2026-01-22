@@ -6,16 +6,16 @@ const darkCodeTheme = themes.dracula;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Windtunnel",
+  title: "Turbulence",
   tagline: "High-performance workflow simulation and testing framework",
   url: "http://localhost",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/windtunnel-logo.svg",
+  favicon: "img/turbulence-logo.svg",
 
-  organizationName: "windtunnel",
-  projectName: "windtunnel",
+  organizationName: "turbulence",
+  projectName: "turbulence",
 
   presets: [
     [
@@ -35,10 +35,10 @@ const config = {
 
   themeConfig: {
     navbar: {
-      title: "Windtunnel",
+      title: "Turbulence",
       logo: {
-        alt: "Windtunnel",
-        src: "img/windtunnel-logo.svg"
+        alt: "Turbulence",
+        src: "img/turbulence-logo.svg"
       },
       items: [
         {

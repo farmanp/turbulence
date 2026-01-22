@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from windtunnel.models.assertion_result import AssertionResult
-from windtunnel.models.manifest import (
+from turbulence.models.assertion_result import AssertionResult
+from turbulence.models.manifest import (
     AssertionRecord,
     InstanceRecord,
     RunConfig,
@@ -15,9 +15,9 @@ from windtunnel.models.manifest import (
     RunSummary,
     StepRecord,
 )
-from windtunnel.models.observation import Observation
-from windtunnel.storage.artifact import ArtifactStore
-from windtunnel.storage.jsonl import JSONLWriter, read_jsonl, write_jsonl_record
+from turbulence.models.observation import Observation
+from turbulence.storage.artifact import ArtifactStore
+from turbulence.storage.jsonl import JSONLWriter, read_jsonl, write_jsonl_record
 
 
 class TestJSONLWriter:

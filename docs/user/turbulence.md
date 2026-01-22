@@ -1,6 +1,6 @@
-# Turbulence (Fault Injection)
+# Pressure (Fault Injection)
 
-Scenarios can include optional `turbulence` settings to inject latency, timeouts,
+Scenarios can include optional `pressure` settings to inject latency, timeouts,
 or retries. This is useful for resilience testing.
 
 ## Example
@@ -8,7 +8,7 @@ or retries. This is useful for resilience testing.
 ```yaml
 id: checkout-with-latency
 
-turbulence:
+pressure:
   global:
     latency_ms:
       min: 50
@@ -25,7 +25,7 @@ turbulence:
 
 ## Policy Resolution
 
-When a request executes, Windtunnel resolves turbulence policies in this order:
+When a request executes, Turbulence resolves pressure policies in this order:
 
 1. Global policy
 2. Service-specific policy

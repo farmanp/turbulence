@@ -2,7 +2,7 @@
 
 ## 1. Research Question (Required)
 **Question:**
-How can we provide a type-safe, developer-friendly DSL for defining Windtunnel scenarios to replace or augment the current YAML configuration?
+How can we provide a type-safe, developer-friendly DSL for defining Turbulence scenarios to replace or augment the current YAML configuration?
 
 **Context:**
 The current YAML-based configuration allows "programming in strings" (e.g., Python expressions in `expect: expression: "..."`), which is brittle, error-prone, and lacks IDE support (linting, autocompletion, type checking). As scenarios grow in complexity, maintaining logic in YAML becomes difficult and risky. A Python-based DSL would leverage existing tooling and provide a better developer experience.
@@ -33,7 +33,7 @@ The current YAML-based configuration allows "programming in strings" (e.g., Pyth
 ## 4. Research Plan
 1. **Pattern Analysis** (3 hours)
    - Review DSLs in other tools (e.g., Locust, K6 (JS), Airflow).
-   - Identify which patterns (decorators, context managers, fluent APIs) fit Windtunnel's architecture.
+   - Identify which patterns (decorators, context managers, fluent APIs) fit Turbulence's architecture.
 
 2. **Prototyping** (6 hours)
    - **Option A (Fluent):** `Scenario("checkout").step(Http.get(...)).expect(...)`

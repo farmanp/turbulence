@@ -5,13 +5,13 @@ from typing import Any
 
 import pytest
 
-from windtunnel.models.observation import Observation
-from windtunnel.turbulence.config import (
+from turbulence.models.observation import Observation
+from turbulence.pressure.config import (
     LatencyConfig,
     TurbulenceConfig,
     TurbulencePolicy,
 )
-from windtunnel.turbulence.engine import TurbulenceEngine
+from turbulence.pressure.engine import TurbulenceEngine
 
 
 @pytest.mark.asyncio

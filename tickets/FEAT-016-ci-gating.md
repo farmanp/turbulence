@@ -11,7 +11,7 @@ CLI supports --fail-on conditions that evaluate against run metrics, returning e
 
 ## 2. Context & Constraints (Required)
 **Background:**
-Windtunnel runs in CI pipelines to validate changes before deployment. Teams need configurable quality gates—minimum pass rates, maximum latencies—that fail the build when violated. This prevents regressions from reaching production.
+Turbulence runs in CI pipelines to validate changes before deployment. Teams need configurable quality gates—minimum pass rates, maximum latencies—that fail the build when violated. This prevents regressions from reaching production.
 
 **Scope:**
 - **In Scope:** --fail-on flag parsing, metric evaluation, multiple conditions (AND logic), exit code 2 on violation
@@ -66,9 +66,9 @@ Then available metrics are listed (pass_rate, p50_latency_ms, p95_latency_ms, p9
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Update src/windtunnel/commands/run.py to add --fail-on
-- Create src/windtunnel/gating/__init__.py
-- Create src/windtunnel/gating/threshold.py for parsing and evaluation
+- Update src/turbulence/commands/run.py to add --fail-on
+- Create src/turbulence/gating/__init__.py
+- Create src/turbulence/gating/threshold.py for parsing and evaluation
 
 **Must NOT Change:**
 - Core run execution
@@ -94,9 +94,9 @@ If unclear, acceptance criteria override all other sections.
 ## Example CI Usage
 ```yaml
 # GitHub Actions example
-- name: Run Windtunnel simulation
+- name: Run Turbulence simulation
   run: |
-    windtunnel run \
+    turbulence run \
       --sut sut.yaml \
       --scenarios scenarios/ \
       --n 1000 \

@@ -1,13 +1,13 @@
-# System Decomposition: Windtunnel
+# System Decomposition: Turbulence
 
-This document provides a high-level architectural decomposition of the Windtunnel framework into its constituent Services (functional components) and Resources (data entities).
+This document provides a high-level architectural decomposition of the Turbulence framework into its constituent Services (functional components) and Resources (data entities).
 
 ## 1. Services
 
 Services represent the active functional modules of the system that perform operations.
 
 ### 1.1 CLI Service
-**Location:** `src/windtunnel/cli.py`, `src/windtunnel/commands/`
+**Location:** `src/turbulence/cli.py`, `src/turbulence/commands/`
 **Responsibility:**
 *   Acts as the primary entry point for the user.
 *   Parses command-line arguments and flags (using `typer`).
@@ -15,14 +15,14 @@ Services represent the active functional modules of the system that perform oper
 *   Handles top-level error reporting and version display.
 
 ### 1.2 Configuration Service
-**Location:** `src/windtunnel/config/`
+**Location:** `src/turbulence/config/`
 **Responsibility:**
 *   **SUT Loader:** Loads and validates System Under Test configurations (`sut.yaml`).
 *   **Scenario Loader:** Loads and validates simulation scenarios (`*.yaml`).
 *   **Validation:** Ensures configurations adhere to defined schemas (using `pydantic`).
 
 ### 1.3 Execution Engine
-**Location:** `src/windtunnel/engine/`
+**Location:** `src/turbulence/engine/`
 **Responsibility:**
 *   **Orchestrator:** Manages the lifecycle of the simulation run.
 *   **Parallel Executor:** Handles concurrent execution of workflow instances using `asyncio` semaphores.
@@ -30,7 +30,7 @@ Services represent the active functional modules of the system that perform oper
 *   **Progress Tracking:** Provides real-time feedback to the console (using `rich`).
 
 ### 1.4 Action Runners
-**Location:** `src/windtunnel/actions/`
+**Location:** `src/turbulence/actions/`
 **Responsibility:**
 *   **Protocol:** Defines the standard interface (`ActionRunner`) for all actions.
 *   **Implementations:**
@@ -40,20 +40,20 @@ Services represent the active functional modules of the system that perform oper
 *   **Observation:** Captures the raw output of an action (e.g., HTTP response, elapsed time).
 
 ### 1.5 Storage Service
-**Location:** `src/windtunnel/storage/`
+**Location:** `src/turbulence/storage/`
 **Responsibility:**
 *   **Persistence:** Saves simulation artifacts to disk.
 *   **Format:** Uses JSONL (JSON Lines) for efficient, append-only logging of high-volume data (steps, instances).
 *   **Manifesting:** Creates run manifests and summaries to index stored data.
 
 ### 1.6 Reporting Service
-**Location:** `src/windtunnel/report/`
+**Location:** `src/turbulence/report/`
 **Responsibility:**
 *   **Analysis:** Aggregates raw artifact data to calculate statistics (pass rates, latency distributions).
 *   **Generation:** Produces human-readable HTML reports from the aggregated data.
 
-### 1.7 Turbulence Service
-**Location:** `src/windtunnel/turbulence/`
+### 1.7 Pressure Service
+**Location:** `src/turbulence/pressure/`
 **Responsibility:**
 *   **Injection:** Introduces controlled faults or delays into the system (e.g., network latency, error spikes) to test resilience.
 
@@ -64,13 +64,13 @@ Services represent the active functional modules of the system that perform oper
 Resources represent the data models and artifacts that flow through the services.
 
 ### 2.1 Configuration Resources
-**Location:** `src/windtunnel/config/`, `src/windtunnel/models/`
+**Location:** `src/turbulence/config/`, `src/turbulence/models/`
 *   **SUT Config:** Defines the target system's base URL and global settings.
 *   **Scenario Config:** Defines the workflow steps, concurrency, and duration.
 *   **Run Config:** Snapshot of the runtime flags (seed, parallelism) used for a specific execution.
 
 ### 2.2 Run Artifacts
-**Location:** `src/windtunnel/models/manifest.py`
+**Location:** `src/turbulence/models/manifest.py`
 These are persisted to the `runs/<run_id>/` directory.
 *   **Manifest (`manifest.json`):** Metadata identifying the run (ID, timestamp, SUT, Scenarios).
 *   **Instance Record (`instances.jsonl`):** High-level status of a single workflow iteration (Pass/Fail, Duration).
@@ -79,7 +79,7 @@ These are persisted to the `runs/<run_id>/` directory.
 *   **Run Summary (`summary.json`):** Aggregated metrics for the entire run.
 
 ### 2.3 Runtime State
-**Location:** `src/windtunnel/engine/context.py`, `src/windtunnel/models/observation.py`
+**Location:** `src/turbulence/engine/context.py`, `src/turbulence/models/observation.py`
 *   **Context:** A dictionary of variables available to the current workflow instance (includes `user`, `iteration`, extracted variables).
 *   **Observation:** The raw result of an action execution, used to update the Context.
 

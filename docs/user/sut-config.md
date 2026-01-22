@@ -1,6 +1,6 @@
 # SUT Configuration
 
-The System Under Test (SUT) config describes the services Windtunnel will call.
+The System Under Test (SUT) config describes the services Turbulence will call.
 It is required for every run.
 
 ## Schema Overview

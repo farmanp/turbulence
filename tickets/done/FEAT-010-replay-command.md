@@ -28,7 +28,7 @@ When a workflow instance fails, developers need to understand what happened. Rep
 
 **Scenario: Replay by run and instance ID**
 Given a completed run "run_001" with instance "inst_042"
-When I run `windtunnel replay --run-id run_001 --instance-id inst_042`
+When I run `turbulence replay --run-id run_001 --instance-id inst_042`
 Then the instance is loaded from artifacts
 And re-executed with original entry context
 
@@ -53,7 +53,7 @@ And execution continues to subsequent steps
 
 **Scenario: Invalid instance ID**
 Given run "run_001" does not contain instance "inst_999"
-When I run `windtunnel replay --run-id run_001 --instance-id inst_999`
+When I run `turbulence replay --run-id run_001 --instance-id inst_999`
 Then an error message indicates the instance was not found
 And exit code is 1
 
@@ -65,8 +65,8 @@ And progress is clearly visible
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Update src/windtunnel/commands/replay.py with full implementation
-- Create src/windtunnel/engine/replay.py for replay logic
+- Update src/turbulence/commands/replay.py with full implementation
+- Create src/turbulence/engine/replay.py for replay logic
 - Update CLI to wire replay command
 
 **Must NOT Change:**

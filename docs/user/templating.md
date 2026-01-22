@@ -1,6 +1,6 @@
 # Templating and Context
 
-Windtunnel uses a Jinja2-based template engine for action fields like `path`,
+Turbulence uses a Jinja2-based template engine for action fields like `path`,
 `headers`, `query`, and `json`. Templates are rendered at execution time using
 the current workflow context.
 

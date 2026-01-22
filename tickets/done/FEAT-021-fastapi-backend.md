@@ -2,7 +2,7 @@
 
 ## Overview
 
-Create a FastAPI backend that reads Windtunnel JSONL artifacts and exposes them via REST API endpoints. This enables the Web UI to access run data without direct filesystem access.
+Create a FastAPI backend that reads Turbulence JSONL artifacts and exposes them via REST API endpoints. This enables the Web UI to access run data without direct filesystem access.
 
 ## Dependencies
 
@@ -11,9 +11,9 @@ Create a FastAPI backend that reads Windtunnel JSONL artifacts and exposes them 
 ## Acceptance Criteria
 
 ### API Setup
-- [ ] Create FastAPI application in `src/windtunnel/api/`
+- [ ] Create FastAPI application in `src/turbulence/api/`
 - [ ] Configure CORS for local development (localhost:5173)
-- [ ] Add API to CLI as `windtunnel serve` command
+- [ ] Add API to CLI as `turbulence serve` command
 - [ ] Serve frontend static files in production mode
 
 ### Endpoints
@@ -88,9 +88,9 @@ def serve(
     port: int = Option(8000),
     host: str = Option("127.0.0.1"),
 ):
-    """Serve the Windtunnel Web UI."""
+    """Serve the Turbulence Web UI."""
     import uvicorn
-    from windtunnel.api.main import create_app
+    from turbulence.api.main import create_app
     
     app = create_app(runs_dir=runs_dir)
     uvicorn.run(app, host=host, port=port)
@@ -102,7 +102,7 @@ Medium (2-3 days)
 
 ## Definition of Done
 
-- [ ] `windtunnel serve` starts API server on localhost:8000
+- [ ] `turbulence serve` starts API server on localhost:8000
 - [ ] `/api/runs` returns list of available runs
 - [ ] `/api/runs/:runId` returns run details with stats
 - [ ] `/api/runs/:runId/instances` returns paginated instances

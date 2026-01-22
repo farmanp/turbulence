@@ -2,7 +2,7 @@
 
 ## Overview
 
-Set up the foundational React application with Vite, TypeScript, and Tailwind CSS. This establishes the development environment and shared components for the Windtunnel Web UI.
+Set up the foundational React application with Vite, TypeScript, and Tailwind CSS. This establishes the development environment and shared components for the Turbulence Web UI.
 
 ## Dependencies
 

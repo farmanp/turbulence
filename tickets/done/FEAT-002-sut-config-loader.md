@@ -4,14 +4,14 @@
 **User Story:**
 As a developer
 I want to define my system under test in a YAML config
-So that Windtunnel knows which services to target and how to communicate with them
+So that Turbulence knows which services to target and how to communicate with them
 
 **Success Looks Like:**
 A validated SUT configuration loaded from YAML with proper Pydantic models, supporting variable interpolation for correlation IDs.
 
 ## 2. Context & Constraints (Required)
 **Background:**
-The SUT (System Under Test) configuration defines the services that Windtunnel will interact with during simulations. This includes base URLs, default headers, and service-specific settings. The config must support dynamic values like `{{run_id}}` and `{{correlation_id}}` for request tracing.
+The SUT (System Under Test) configuration defines the services that Turbulence will interact with during simulations. This includes base URLs, default headers, and service-specific settings. The config must support dynamic values like `{{run_id}}` and `{{correlation_id}}` for request tracing.
 
 **Scope:**
 - **In Scope:** YAML parsing, Pydantic models, validation, header templating
@@ -51,9 +51,9 @@ And each has its own base_url and optional headers
 
 ## 4. AI Execution Instructions (Required)
 **Allowed to Change:**
-- Create src/windtunnel/config/__init__.py
-- Create src/windtunnel/config/sut.py with Pydantic models
-- Create src/windtunnel/config/loader.py for YAML loading
+- Create src/turbulence/config/__init__.py
+- Create src/turbulence/config/sut.py with Pydantic models
+- Create src/turbulence/config/loader.py for YAML loading
 
 **Must NOT Change:**
 - CLI structure from FEAT-001

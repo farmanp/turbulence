@@ -1,15 +1,15 @@
 # Architecture Overview
 
-Windtunnel is organized around a few core subsystems:
+Turbulence is organized around a few core subsystems:
 
-- **Config** (`src/windtunnel/config/`): Pydantic models for SUT and scenarios.
-- **Engine** (`src/windtunnel/engine/`): Async execution, context, templating,
+- **Config** (`src/turbulence/config/`): Pydantic models for SUT and scenarios.
+- **Engine** (`src/turbulence/engine/`): Async execution, context, templating,
   and replay mechanics.
-- **Actions** (`src/windtunnel/actions/`): HTTP, wait, and assertion runners.
-- **Storage** (`src/windtunnel/storage/`): JSONL artifact persistence and
+- **Actions** (`src/turbulence/actions/`): HTTP, wait, and assertion runners.
+- **Storage** (`src/turbulence/storage/`): JSONL artifact persistence and
   summaries under `runs/<run_id>/`.
-- **Report** (`src/windtunnel/report/`): HTML report generation from artifacts.
-- **API** (`src/windtunnel/api/`): API service used by the web UI.
+- **Report** (`src/turbulence/report/`): HTML report generation from artifacts.
+- **API** (`src/turbulence/api/`): API service used by the web UI.
 - **UI** (`ui/`): React + Vite dashboard.
 
 ## Execution Flow
