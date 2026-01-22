@@ -1,6 +1,8 @@
 """HTTP action runner for executing HTTP requests."""
 
+import asyncio
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -76,61 +78,113 @@ class HttpActionRunner(BaseActionRunner):
         if self.action.body is not None:
             request_kwargs["json"] = self.action.body
 
-        # Execute request with timing
-        start_time = time.perf_counter()
-        errors: list[str] = []
-        response_headers: dict[str, str] = {}
+        # Determine retry configuration
+        retry_config = self.action.retry
+        max_attempts = retry_config.max_attempts if retry_config else 1
+        
+        # Track overall execution
+        total_start_time = time.perf_counter()
+        attempts: list[dict[str, Any]] = []
+        
+        # Variables to hold final state
         response_body: Any = None
+        response_headers: dict[str, str] = {}
         status_code: int | None = None
+        final_errors: list[str] = []
         ok = False
 
-        try:
-            if self._client is not None:
-                response = await self._client.request(**request_kwargs)
-            else:
-                async with httpx.AsyncClient() as client:
-                    response = await client.request(**request_kwargs)
-
-            end_time = time.perf_counter()
-            latency_ms = (end_time - start_time) * 1000
-
-            status_code = response.status_code
-            response_headers = dict(response.headers)
-
-            # Parse response body
+        for attempt_idx in range(1, max_attempts + 1):
+            is_last_attempt = attempt_idx == max_attempts
+            attempt_start = time.perf_counter()
+            current_errors: list[str] = []
+            should_retry = False
+            
             try:
-                response_body = response.json()
-            except Exception:
-                response_body = response.text
+                if self._client is not None:
+                    response = await self._client.request(**request_kwargs)
+                else:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.request(**request_kwargs)
+                
+                status_code = response.status_code
+                response_headers = dict(response.headers)
+                
+                # Parse response body
+                try:
+                    response_body = response.json()
+                except Exception:
+                    response_body = response.text
 
-            # Consider 2xx status codes as success
-            ok = 200 <= status_code < 300
+                ok = 200 <= status_code < 300
+                
+                if not ok:
+                    current_errors.append(f"HTTP {status_code}: {response.reason_phrase}")
+                    if retry_config and status_code in retry_config.on_status:
+                        should_retry = True
 
-            if not ok:
-                errors.append(f"HTTP {status_code}: {response.reason_phrase}")
+            except httpx.TimeoutException as e:
+                current_errors.append(f"Request timeout: {e}")
+                if retry_config and retry_config.on_timeout:
+                    should_retry = True
+            except (httpx.ConnectError, httpx.ConnectTimeout) as e:
+                current_errors.append(f"Connection error: {e}")
+                if retry_config and retry_config.on_connection_error:
+                    should_retry = True
+            except httpx.RequestError as e:
+                current_errors.append(f"Request error: {e}")
+                # Generic request errors usually not retried unless explicitly covered
+            except Exception as e:
+                current_errors.append(f"Unexpected error: {e}")
 
-        except httpx.TimeoutException as e:
-            end_time = time.perf_counter()
-            latency_ms = (end_time - start_time) * 1000
-            errors.append(f"Request timeout: {e}")
-        except httpx.RequestError as e:
-            end_time = time.perf_counter()
-            latency_ms = (end_time - start_time) * 1000
-            errors.append(f"Request error: {e}")
-        except Exception as e:
-            end_time = time.perf_counter()
-            latency_ms = (end_time - start_time) * 1000
-            errors.append(f"Unexpected error: {e}")
+            attempt_duration = (time.perf_counter() - attempt_start) * 1000
+            
+            attempts.append({
+                "attempt": attempt_idx,
+                "status_code": status_code,
+                "ok": ok,
+                "latency_ms": attempt_duration,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": current_errors[0] if current_errors else None
+            })
 
+            if ok:
+                break
+            
+            if should_retry and not is_last_attempt:
+                # Calculate backoff delay
+                delay = 0.0
+                if retry_config:
+                    if retry_config.backoff == "fixed":
+                        delay = retry_config.delay_ms / 1000.0
+                    elif retry_config.backoff == "exponential":
+                        # Exponential backoff: base * 2^(attempt-1)
+                        # attempt_idx is 1-based. So 1->base, 2->2*base, etc.
+                        # Wait, typically attempt 1 failed, we are about to start attempt 2.
+                        # backoff factor usually applies to the retry count.
+                        retry_count = attempt_idx
+                        delay_ms = min(
+                            retry_config.base_delay_ms * (2 ** (retry_count - 1)),
+                            retry_config.max_delay_ms
+                        )
+                        delay = delay_ms / 1000.0
+                
+                await asyncio.sleep(delay)
+            else:
+                final_errors = current_errors
+                break
+
+        total_latency_ms = (time.perf_counter() - total_start_time) * 1000
+        
         # Create observation
         observation = Observation(
             ok=ok,
             status_code=status_code,
-            latency_ms=latency_ms,
+            latency_ms=total_latency_ms,
             headers=response_headers,
             body=response_body,
-            errors=errors,
+            errors=final_errors,
             action_name=self.action.name,
+            attempts=attempts,
         )
 
         # Extract values into context
@@ -142,7 +196,7 @@ class HttpActionRunner(BaseActionRunner):
                 updated_context,
             )
             if extraction_errors:
-                errors.extend(extraction_errors)
+                observation.errors.extend(extraction_errors)
 
         return observation, updated_context
 

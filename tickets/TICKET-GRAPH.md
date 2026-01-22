@@ -226,7 +226,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 ### Batch 10: Enterprise Readiness
 | Ticket | Title | Dependencies | Estimated Complexity | Status |
 |--------|-------|--------------|---------------------|--------|
-| FEAT-030 | Retry policies for HTTP actions | FEAT-004 | Medium | TODO |
+| FEAT-030 | Retry policies for HTTP actions | FEAT-004 | Medium | DONE |
 | FEAT-031 | Environment variable support | FEAT-002, FEAT-003 | Low | DONE |
 | FEAT-032 | Environment profiles | FEAT-031 | Medium | DONE |
 
@@ -314,5 +314,5 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 
 ## AI Agent Status
 
-Turbulence core and Web UI foundation are stable. Environment variable support and profiles are implemented.
-**Current Frontier:** Polish & CI (Batch 6), Advanced Engine (Batch 7), Web UI Enhancements (Batch 9), and Retry Policies (FEAT-030).
+Turbulence core and Web UI foundation are stable. Environment features (Vars, Profiles, Retries) are implemented.
+**Current Frontier:** Polish & CI (Batch 6), Advanced Engine (Batch 7), Web UI Enhancements (Batch 9), and Enhanced Reports (FEAT-015).

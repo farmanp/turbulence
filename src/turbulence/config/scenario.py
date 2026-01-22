@@ -44,6 +44,49 @@ class Expectation(BaseModel):
     )
 
 
+class RetryConfig(BaseModel):
+    """Configuration for automatic action retries."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    max_attempts: int = Field(
+        default=3,
+        description="Maximum total attempts (1 initial + retries)",
+        gt=0,
+    )
+    on_status: list[int] = Field(
+        default_factory=list,
+        description="List of HTTP status codes to retry on (e.g., [500, 502])",
+    )
+    on_timeout: bool = Field(
+        default=False,
+        description="Retry on request timeouts",
+    )
+    on_connection_error: bool = Field(
+        default=False,
+        description="Retry on connection errors",
+    )
+    backoff: Literal["fixed", "exponential"] = Field(
+        default="exponential",
+        description="Backoff strategy",
+    )
+    delay_ms: int = Field(
+        default=1000,
+        description="Delay for fixed backoff (ms)",
+        ge=0,
+    )
+    base_delay_ms: int = Field(
+        default=100,
+        description="Initial delay for exponential backoff (ms)",
+        ge=0,
+    )
+    max_delay_ms: int = Field(
+        default=10000,
+        description="Maximum delay for exponential backoff (ms)",
+        ge=0,
+    )
+
+
 class HttpAction(BaseModel):
     """HTTP action configuration for making requests."""
 
@@ -70,6 +113,10 @@ class HttpAction(BaseModel):
     extract: dict[str, str] = Field(
         default_factory=dict,
         description="Values to extract from response using JSONPath",
+    )
+    retry: RetryConfig | None = Field(
+        default=None,
+        description="Retry policy for this action",
     )
 
 

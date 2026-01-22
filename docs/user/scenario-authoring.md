@@ -74,10 +74,30 @@ Turbulence supports three action types:
     customer_id: "{{entry.seed_data.customer_id}}"
   extract:
     cart_id: "$.id"
+  retry:
+    max_attempts: 3
+    on_status: [500, 502, 503]
+    on_timeout: true
+    backoff: exponential
+    base_delay_ms: 100
 ```
 
 - `extract` values use JSONPath. Extracted values become top-level context
   variables for later actions.
+- `retry` (optional) configures automatic retries on failure.
+
+### Retry Configuration
+
+HTTP actions support configurable retry policies:
+
+- `max_attempts` (default: 3): Total attempts including the first one.
+- `on_status` (default: []): List of status codes to retry (e.g., `[500, 503]`).
+- `on_timeout` (default: false): Retry on request timeout.
+- `on_connection_error` (default: false): Retry on connection refused/error.
+- `backoff` (default: "exponential"): "fixed" or "exponential".
+- `delay_ms` (default: 1000): Delay for fixed backoff.
+- `base_delay_ms` (default: 100): Initial delay for exponential backoff.
+- `max_delay_ms` (default: 10000): Max delay for exponential backoff.
 
 ### Wait Action
 

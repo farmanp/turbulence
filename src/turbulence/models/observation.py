@@ -47,3 +47,7 @@ class Observation(BaseModel):
         default=None,
         description="Injected turbulence details, if any",
     )
+    attempts: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Details of each retry attempt",
+    )

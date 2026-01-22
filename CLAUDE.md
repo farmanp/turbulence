@@ -147,6 +147,7 @@ turbulence serve --port 8000
 - Real-time WebSocket streaming
 - Environment variable support
 - Environment profiles
+- Retry policies
 
 **Upcoming (Batch 6-7, 9-10):**
 - Enhanced report aggregations
@@ -155,7 +156,6 @@ turbulence serve --port 8000
 - SQLite backend option
 - Branching flows
 - Web UI enhancements (Scenario visualizer, live progress)
-- Retry policies (FEAT-030)
 
 See `tickets/TICKET-GRAPH.md` for full roadmap.
 
