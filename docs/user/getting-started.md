@@ -19,6 +19,48 @@ If you want developer tooling, use:
 pip install -e ".[dev]"
 ```
 
+## Try it now
+
+Don't have an API handy? Run this against [httpbin.org](https://httpbin.org) to see Windtunnel in action immediately.
+
+1. Create a simple SUT config (`httpbin-sut.yaml`):
+
+```yaml
+name: httpbin-demo
+services:
+  api:
+    base_url: "https://httpbin.org"
+```
+
+2. Create a scenario (`scenarios/echo.yaml`):
+
+```yaml
+id: echo-flow
+description: Simple echo test against httpbin
+flow:
+  - name: send_data
+    type: http
+    service: api
+    method: POST
+    path: /post
+    json:
+      message: "Hello Windtunnel"
+    extract:
+      returned_data: "$.json.message"
+
+assertions:
+  - name: verify_echo
+    expect:
+      jsonpath: "$.json.message"
+      equals: "Hello Windtunnel"
+```
+
+3. Run the simulation:
+
+```bash
+windtunnel run --sut httpbin-sut.yaml --scenarios scenarios/ --n 10
+```
+
 ## Quick Start
 
 1. Create a SUT config (`sut.yaml`):

@@ -21,3 +21,9 @@ Use the **User Guide** to get running quickly and author scenarios. The
    `windtunnel replay`.
 
 If you are new, start with **User Guide → Getting Started**.
+
+## Next Steps
+
+- **I want to write tests:** Go to [Scenario Authoring](/user/scenario-authoring) to learn how to define workflows.
+- **I want to understand the code:** Check out the [Architecture Decomposition](/architecture/decomposition) to see how the system is built.
+- **I want to contribute:** Read the [Contributing Guide](/developer/contributing) for setup instructions.
