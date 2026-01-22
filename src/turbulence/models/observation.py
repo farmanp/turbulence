@@ -55,3 +55,19 @@ class Observation(BaseModel):
         default_factory=list,
         description="Details of each retry attempt",
     )
+    branch_condition: str | None = Field(
+        default=None,
+        description="The condition expression for branch decisions",
+    )
+    branch_result: bool | None = Field(
+        default=None,
+        description="Evaluation result of branch condition (True/False)",
+    )
+    branch_taken: str | None = Field(
+        default=None,
+        description="Which branch was taken ('if_true' or 'if_false')",
+    )
+    condition_skipped: bool = Field(
+        default=False,
+        description="Whether this step was skipped due to a false condition",
+    )
