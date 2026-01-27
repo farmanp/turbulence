@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from turbulence.config.env import EnvVarError, resolve_env_vars
 from turbulence.config.scenario import Scenario
-from turbulence.config.sut import SUTConfig
+from turbulence.config.sut import HttpServiceConfig, SUTConfig
 
 
 class ConfigLoadError(Exception):
@@ -105,14 +105,46 @@ def _apply_profile(config: SUTConfig, profile_name: str) -> SUTConfig:
 
             base_service = config.services[name]
 
-            if override.base_url:
-                base_service.base_url = override.base_url
+            # Protocol override
+            if override.protocol:
+                base_service.protocol = override.protocol
 
-            if override.timeout_seconds:
-                base_service.timeout_seconds = override.timeout_seconds
+            # HTTP overrides
+            if override.http:
+                if not base_service.http:
+                    # If base service didn't have HTTP config but override does,
+                    # we need a valid base_url to initialize it.
+                    # This case is rare but can happen if protocol changed.
+                    if override.http.base_url:
+                        base_service.http = HttpServiceConfig(
+                            base_url=override.http.base_url,
+                            headers=override.http.headers or {},
+                            timeout_seconds=override.http.timeout_seconds or 30.0,
+                        )
+                else:
+                    if override.http.base_url:
+                        base_service.http.base_url = override.http.base_url
+                    if override.http.timeout_seconds:
+                        base_service.http.timeout_seconds = override.http.timeout_seconds
+                    if override.http.headers:
+                        base_service.http.headers.update(override.http.headers)
 
-            if override.headers:
-                base_service.headers.update(override.headers)
+            # gRPC/Kafka overrides can be added here if needed
+            if override.grpc and base_service.grpc:
+                if override.grpc.host:
+                    base_service.grpc.host = override.grpc.host
+                if override.grpc.port:
+                    base_service.grpc.port = override.grpc.port
+                if override.grpc.use_tls is not None:
+                    base_service.grpc.use_tls = override.grpc.use_tls
+                if override.grpc.timeout_seconds:
+                    base_service.grpc.timeout_seconds = override.grpc.timeout_seconds
+
+            if override.kafka and base_service.kafka:
+                if override.kafka.bootstrap_servers:
+                    base_service.kafka.bootstrap_servers = override.kafka.bootstrap_servers
+                if override.kafka.timeout_seconds:
+                    base_service.kafka.timeout_seconds = override.kafka.timeout_seconds
 
     return config
 

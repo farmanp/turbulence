@@ -12,11 +12,19 @@ class Observation(BaseModel):
     including success/failure status, timing, response data, and any errors.
     """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
 
     ok: bool = Field(
         ...,
         description="Whether the action completed successfully",
+    )
+    protocol: str = Field(
+        default="http",
+        description="Protocol name (e.g., http, grpc, kafka)",
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Protocol-specific metadata",
     )
     status_code: int | None = Field(
         default=None,

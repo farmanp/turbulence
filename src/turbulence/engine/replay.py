@@ -5,15 +5,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import httpx
-
-from turbulence.actions.assert_ import AssertActionRunner
 from turbulence.config.scenario import (
-    AssertAction,
-    Assertion,
     Scenario,
 )
 from turbulence.config.sut import SUTConfig
+from turbulence.engine.client_pool import ClientPool
 from turbulence.engine.context import WorkflowContext
 from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
@@ -289,18 +285,20 @@ class ReplayEngine:
         if self.sut_config is not None:
             self.sut_config.default_headers["X-Correlation-ID"] = ctx.correlation_id
 
+        client_pool = ClientPool(self.sut_config)
         scenario_runner = ScenarioRunner(
             template_engine=self.template_engine,
             sut_config=self.sut_config,
+            client_pool=client_pool,
             turbulence_engine=None,  # No turbulence in replay
         )
 
         steps: list[StepResult] = []
         success = True
 
-        async with httpx.AsyncClient() as client:
+        try:
             async for step_index, action, observation, context_dict in scenario_runner.execute_flow(
-                scenario, context_dict, client
+                scenario, context_dict
             ):
                 step_num = step_index + 1
 
@@ -327,6 +325,8 @@ class ReplayEngine:
 
                 if not observation.ok:
                     success = False
+        finally:
+            await client_pool.close_all()
 
         return ReplayResult(
             instance_id=instance_id,

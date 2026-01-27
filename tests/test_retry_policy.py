@@ -1,6 +1,5 @@
 """Tests for HTTP action retry policies."""
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -41,24 +40,24 @@ async def test_retry_on_status_success_eventually(sut_config, mock_client):
             on_status=[503]
         )
     )
-    
+
     # Mock responses: 503, then 200
     mock_503 = MagicMock()
     mock_503.status_code = 503
     mock_503.reason_phrase = "Service Unavailable"
     mock_503.headers = {}
     mock_503.text = "Error"
-    
+
     mock_200 = MagicMock()
     mock_200.status_code = 200
     mock_200.headers = {}
     mock_200.json.return_value = {"status": "ok"}
-    
+
     mock_client.request.side_effect = [mock_503, mock_200]
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
     observation, _ = await runner.execute({})
-    
+
     assert observation.ok
     assert observation.status_code == 200
     assert len(observation.attempts) == 2
@@ -79,17 +78,17 @@ async def test_retry_exhausted(sut_config, mock_client):
             on_status=[503]
         )
     )
-    
+
     mock_503 = MagicMock()
     mock_503.status_code = 503
     mock_503.reason_phrase = "Service Unavailable"
     mock_503.headers = {}
-    
+
     mock_client.request.return_value = mock_503
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
     observation, _ = await runner.execute({})
-    
+
     assert not observation.ok
     assert observation.status_code == 503
     assert len(observation.attempts) == 3
@@ -111,7 +110,7 @@ async def test_retry_on_timeout(sut_config, mock_client):
             delay_ms=10
         )
     )
-    
+
     mock_200 = MagicMock()
     mock_200.status_code = 200
     mock_200.headers = {}
@@ -122,10 +121,10 @@ async def test_retry_on_timeout(sut_config, mock_client):
         httpx.TimeoutException("Timeout"),
         mock_200
     ]
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
     observation, _ = await runner.execute({})
-    
+
     assert observation.ok
     assert len(observation.attempts) == 2
     assert "Timeout" in str(observation.attempts[0]["error"])
@@ -146,7 +145,7 @@ async def test_retry_on_connection_error(sut_config, mock_client):
             delay_ms=10
         )
     )
-    
+
     mock_200 = MagicMock()
     mock_200.status_code = 200
     mock_200.headers = {}
@@ -157,10 +156,10 @@ async def test_retry_on_connection_error(sut_config, mock_client):
         httpx.ConnectError("Refused"),
         mock_200
     ]
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
     observation, _ = await runner.execute({})
-    
+
     assert observation.ok
     assert len(observation.attempts) == 2
     assert "Refused" in str(observation.attempts[0]["error"])
@@ -179,18 +178,18 @@ async def test_no_retry_on_unconfigured_error(sut_config, mock_client):
             on_status=[500]
         )
     )
-    
+
     # 404 is not in on_status
     mock_404 = MagicMock()
     mock_404.status_code = 404
     mock_404.reason_phrase = "Not Found"
     mock_404.headers = {}
-    
+
     mock_client.request.return_value = mock_404
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
     observation, _ = await runner.execute({})
-    
+
     assert not observation.ok
     assert observation.status_code == 404
     assert len(observation.attempts) == 1  # Only 1 attempt
@@ -211,18 +210,18 @@ async def test_fixed_backoff_timing(sut_config, mock_client):
             delay_ms=50
         )
     )
-    
+
     mock_503 = MagicMock()
     mock_503.status_code = 503
     mock_503.headers = {}
-    
+
     mock_client.request.return_value = mock_503
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
-    
+
     with patch("asyncio.sleep") as mock_sleep:
         await runner.execute({})
-        
+
         # Should sleep once for 0.05s
         mock_sleep.assert_called_once_with(0.05)
 
@@ -242,18 +241,18 @@ async def test_exponential_backoff_timing(sut_config, mock_client):
             base_delay_ms=100
         )
     )
-    
+
     mock_503 = MagicMock()
     mock_503.status_code = 503
     mock_503.headers = {}
-    
+
     mock_client.request.return_value = mock_503
-    
+
     runner = HttpActionRunner(action, sut_config, client=mock_client)
-    
+
     with patch("asyncio.sleep") as mock_sleep:
         await runner.execute({})
-        
+
         # Attempt 1 -> Fail. Retry count = 1. Delay = 100 * 2^0 = 100ms = 0.1s
         # Attempt 2 -> Fail. Retry count = 2. Delay = 100 * 2^1 = 200ms = 0.2s
         assert mock_sleep.call_count == 2

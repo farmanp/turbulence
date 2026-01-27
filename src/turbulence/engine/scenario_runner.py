@@ -6,13 +6,10 @@ the run command and replay engine.
 
 import asyncio
 import logging
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
-import httpx
-
-from turbulence.actions.assert_ import AssertActionRunner
-from turbulence.actions.http import HttpActionRunner
-from turbulence.actions.wait import WaitActionRunner
+from turbulence.actions import ActionRunnerFactory
 from turbulence.config.scenario import (
     Action,
     AssertAction,
@@ -22,6 +19,7 @@ from turbulence.config.scenario import (
     WaitAction,
 )
 from turbulence.config.sut import SUTConfig
+from turbulence.engine.client_pool import ClientPool
 from turbulence.engine.conditions import ConditionEvaluator
 from turbulence.engine.template import TemplateEngine
 from turbulence.models.observation import Observation
@@ -42,6 +40,7 @@ class ScenarioRunner:
         self,
         template_engine: TemplateEngine,
         sut_config: SUTConfig,
+        client_pool: ClientPool,
         turbulence_engine: TurbulenceEngine | None = None,
     ) -> None:
         """Initialize the scenario runner.
@@ -49,10 +48,12 @@ class ScenarioRunner:
         Args:
             template_engine: Engine for rendering template variables
             sut_config: System under test configuration
+            client_pool: Pool for managing connection lifecycles
             turbulence_engine: Optional engine for fault injection
         """
         self.template_engine = template_engine
         self.sut_config = sut_config
+        self.client_pool = client_pool
         self.turbulence_engine = turbulence_engine
         self.condition_evaluator = ConditionEvaluator(template_engine)
 
@@ -60,7 +61,6 @@ class ScenarioRunner:
         self,
         scenario: Scenario,
         context: dict[str, Any],
-        client: httpx.AsyncClient,
     ) -> AsyncIterator[tuple[int, Action, Observation, dict[str, Any]]]:
         """Execute scenario flow steps, yielding results for each step.
 
@@ -87,14 +87,13 @@ class ScenarioRunner:
         async for result in self._execute_actions_recursive(
             actions=scenario.flow,
             context=context,
-            client=client,
             start_index=0,
             step_delay_ms=step_delay_ms,
             jitter_ms=jitter_ms,
         ):
             yield result
             steps_executed += 1
-            
+
             # Stop if global max reached
             if steps_executed >= max_steps:
                 logger.warning(f"Scenario {scenario.id} reached max_steps ({max_steps})")
@@ -109,7 +108,6 @@ class ScenarioRunner:
         self,
         actions: list[Action],
         context: dict[str, Any],
-        client: httpx.AsyncClient,
         start_index: int,
         step_delay_ms: int,
         jitter_ms: int,
@@ -156,12 +154,12 @@ class ScenarioRunner:
 
             if isinstance(action, BranchAction):
                 # Execute BranchAction logic
-                obs, context, branch_results = await self._execute_branch(action, context, client, step_delay_ms, jitter_ms)
-                
+                obs, context, branch_results = await self._execute_branch(action, context, step_delay_ms, jitter_ms)
+
                 # Yield the branch decision observation
                 yield idx, action, obs, context
                 idx += 1
-                
+
                 # Then yield each individual step observation from the branch
                 for b_idx, b_action, b_obs, b_context in branch_results:
                     # Update the global context with the nested execution's result
@@ -172,7 +170,6 @@ class ScenarioRunner:
                 observation, context = await self._execute_action(
                     action=action,
                     context=context,
-                    client=client,
                 )
 
                 # Update last_response context for HTTP and Wait actions
@@ -186,7 +183,6 @@ class ScenarioRunner:
         self,
         action: BranchAction,
         context: dict[str, Any],
-        client: httpx.AsyncClient,
         step_delay_ms: int,
         jitter_ms: int,
     ) -> tuple[Observation, dict[str, Any], list[tuple[int, Action, Observation, dict[str, Any]]]]:
@@ -221,7 +217,6 @@ class ScenarioRunner:
         async for r in self._execute_actions_recursive(
             actions=branch_actions,
             context=context,
-            client=client,
             start_index=0,
             step_delay_ms=step_delay_ms,
             jitter_ms=jitter_ms,
@@ -235,7 +230,6 @@ class ScenarioRunner:
         self,
         action: Action,
         context: dict[str, Any],
-        client: httpx.AsyncClient,
     ) -> tuple[Observation, dict[str, Any]]:
         """Execute a single action with template rendering.
 
@@ -250,45 +244,47 @@ class ScenarioRunner:
         # Render templates in action
         rendered_action = self._render_action(action, context)
 
-        # Execute based on action type
-        if isinstance(rendered_action, HttpAction):
-            runner = HttpActionRunner(
+        # Resolve appropriate client from pool
+        client = None
+        channel = None
+
+        if hasattr(rendered_action, "service"):
+            service_name = rendered_action.service
+            service = self.sut_config.get_service(service_name)
+
+            if service.protocol == "http":
+                client = await self.client_pool.get_http_client(service_name)
+            elif service.protocol == "grpc":
+                channel = await self.client_pool.get_grpc_channel(service_name)
+
+        # Execute based on action type via Factory
+        try:
+            runner = ActionRunnerFactory.create(
                 action=rendered_action,
                 sut_config=self.sut_config,
                 client=client,
+                channel=channel,
             )
+        except ValueError as e:
+            raise ValueError(f"Unknown action type: {type(action)}. {e}")
 
-            # Apply turbulence if configured
-            if self.turbulence_engine is not None:
-                policy = self.turbulence_engine.resolve_policy(
-                    service=rendered_action.service,
-                    action=rendered_action.name,
+        # Apply turbulence if configured (currently only for HTTP)
+        if isinstance(rendered_action, HttpAction) and self.turbulence_engine is not None:
+            policy = self.turbulence_engine.resolve_policy(
+                service=rendered_action.service,
+                action=rendered_action.name,
+            )
+            if policy is not None:
+                return await self.turbulence_engine.apply(
+                    policy=policy,
+                    action_name=rendered_action.name,
+                    service_name=rendered_action.service,
+                    instance_id=str(context.get("instance_id", "")),
+                    context=context,
+                    execute=lambda: runner.execute(context),
                 )
-                if policy is not None:
-                    return await self.turbulence_engine.apply(
-                        policy=policy,
-                        action_name=rendered_action.name,
-                        service_name=rendered_action.service,
-                        instance_id=str(context.get("instance_id", "")),
-                        context=context,
-                        execute=lambda: runner.execute(context),
-                    )
 
-            return await runner.execute(context)
-
-        if isinstance(rendered_action, WaitAction):
-            runner = WaitActionRunner(
-                action=rendered_action,
-                sut_config=self.sut_config,
-                client=client,
-            )
-            return await runner.execute(context)
-
-        if isinstance(rendered_action, AssertAction):
-            runner = AssertActionRunner(action=rendered_action)
-            return await runner.execute(context)
-
-        raise ValueError(f"Unknown action type: {type(action)}")
+        return await runner.execute(context)
 
     def _render_action(
         self,
@@ -315,7 +311,7 @@ class ScenarioRunner:
             return AssertAction(**rendered_dict)
         if isinstance(action, BranchAction):
             return BranchAction(**rendered_dict)
-        
+
         raise ValueError(f"Unknown action type for rendering: {type(action)}")
 
     def _update_last_response(

@@ -6,7 +6,11 @@ from pathlib import Path
 import pytest
 
 from turbulence.report import HTMLReportGenerator
-from turbulence.report.html import ActionStats, ReportData, ScenarioStats, calculate_percentile
+from turbulence.report.html import (
+    ReportData,
+    ScenarioStats,
+    calculate_percentile,
+)
 
 
 class TestPercentiles:
@@ -159,18 +163,18 @@ class TestHTMLReportGenerator:
         # Create steps.jsonl
         steps = [
             {
-                "instance_id": "inst_001", 
-                "step_name": "login", 
+                "instance_id": "inst_001",
+                "step_name": "login",
                 "observation": {"ok": True, "latency_ms": 100, "service": "auth"}
             },
             {
-                "instance_id": "inst_001", 
-                "step_name": "get_cart", 
+                "instance_id": "inst_001",
+                "step_name": "get_cart",
                 "observation": {"ok": True, "latency_ms": 50, "service": "cart"}
             },
             {
-                "instance_id": "inst_003", 
-                "step_name": "login", 
+                "instance_id": "inst_003",
+                "step_name": "login",
                 "observation": {"ok": False, "latency_ms": 5000, "errors": ["Timeout"], "service": "auth"}
             },
         ]

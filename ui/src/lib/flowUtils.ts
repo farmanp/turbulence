@@ -15,8 +15,9 @@ export function generateFlowElements(scenario: Scenario): { nodes: Node[]; edges
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    const nodeSpacingY = 100;
-    const startY = 50;
+    const nodeSpacingY = 140;
+    const startY = 60;
+    const nodeWidth = 260;
 
     // Generate nodes for flow steps
     scenario.flow.forEach((step, index) => {
@@ -50,9 +51,8 @@ export function generateFlowElements(scenario: Scenario): { nodes: Node[]; edges
     });
 
     // Center nodes horizontally
-    const maxWidth = 280;
     nodes.forEach((node) => {
-        node.position.x = -maxWidth / 2;
+        node.position.x = -nodeWidth / 2;
     });
 
     return { nodes, edges };

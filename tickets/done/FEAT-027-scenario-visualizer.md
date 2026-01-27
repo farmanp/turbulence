@@ -89,13 +89,13 @@ If unclear, acceptance criteria override all other sections.
 - feat(ui): add scenario visualizer with YAML-to-flowchart rendering
 
 ## 6. Verification & Definition of Done (Required)
-- [ ] Acceptance criteria pass
-- [ ] Flowchart renders correctly for sample scenarios
-- [ ] Action types visually differentiated
-- [ ] Step click reveals configuration
-- [ ] Error handling for invalid YAML
-- [ ] Performance acceptable for large scenarios
-- [ ] Code reviewed
+- [x] Acceptance criteria pass
+- [x] Flowchart renders correctly for sample scenarios
+- [x] Action types visually differentiated
+- [x] Step click reveals configuration
+- [x] Error handling for invalid YAML
+- [x] Performance acceptable for large scenarios
+- [x] Code reviewed
 
 ## 7. Resources
 - [React Flow](https://reactflow.dev/) - potential flowchart library

@@ -3,8 +3,11 @@
 ## Project Structure & Module Organization
 
 - `src/turbulence/` contains the library and CLI implementation. Key modules include `actions/`, `commands/`, `config/`, `engine/`, `models/`, `report/`, and `storage/`.
+- `ui/` hosts the React frontend (Vite + Tailwind) with `components/`, `pages/`, and `api/` clients.
+- `docs/` houses the Docusaurus documentation site and user guides.
 - `tests/` contains pytest suites and fixtures. Scenario samples live under `tests/fixtures/scenarios/`.
 - `tickets/` holds planning and design notes for features and infra work.
+- `use-cases/` contains validated scenario + SUT examples for common flows.
 - Module-level `CLAUDE.md` files document local conventions; skim the nearest one before making changes in that area.
 
 ## Build, Test, and Development Commands
@@ -13,7 +16,9 @@
 - `turbulence --help` verifies CLI wiring and lists available commands.
 - `pytest tests/` runs the test suite.
 - `ruff check src/ tests/` runs linting.
+- `ruff format src/ tests/` formats code.
 - `mypy src/` runs strict type checking.
+- `npm run docs:start` runs the docs dev server.
 
 ## Coding Style & Naming Conventions
 
@@ -21,6 +26,7 @@
 - Prefer double quotes (Ruff formatter configuration).
 - Type annotations are expected everywhere (`mypy` is strict and disallows untyped defs).
 - Use snake_case for functions/modules, PascalCase for classes, and descriptive CLI command names.
+- Prefer UTC-aware datetimes (`datetime.now(UTC)`).
 
 ## Testing Guidelines
 

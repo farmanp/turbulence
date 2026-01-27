@@ -194,6 +194,8 @@ npm run docs:build        # Build static site
 
 **Upcoming:**
 - Batch 6: Variation engine (FEAT-017)
+- Batch 7: Advanced Engine (Spikes)
+- Batch 11: Multi-Protocol Foundation (FEAT-033 to FEAT-037)
 
 See `tickets/TICKET-GRAPH.md` for full roadmap with 32 feature tickets across 10 batches.
 

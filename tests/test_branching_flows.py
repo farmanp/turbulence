@@ -1,20 +1,19 @@
 """Integration tests for branching flows."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
+import pytest
 
 from turbulence.config.scenario import (
-    Action,
     AssertAction,
     BranchAction,
     Expectation,
     HttpAction,
     Scenario,
-    StopCondition,
 )
-from turbulence.config.sut import SUTConfig, Service
+from turbulence.config.sut import Service, SUTConfig
+from turbulence.engine.client_pool import ClientPool
 from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
 from turbulence.models.observation import Observation
@@ -210,11 +209,13 @@ class TestScenarioRunnerBranching:
             ],
         )
 
-        runner = ScenarioRunner(template_engine, sut_config)
+        pool = ClientPool(sut_config)
+        pool.get_http_client = AsyncMock(return_value=mock_client)
+        runner = ScenarioRunner(template_engine, sut_config, client_pool=pool)
         context = {"status": "declined"}
 
         results = []
-        async for result in runner.execute_flow(scenario, context, mock_client):
+        async for result in runner.execute_flow(scenario, context):
             results.append(result)
 
         # Should have branch decision + one action from if_true
@@ -274,11 +275,13 @@ class TestScenarioRunnerBranching:
             ],
         )
 
-        runner = ScenarioRunner(template_engine, sut_config)
+        pool = ClientPool(sut_config)
+        pool.get_http_client = AsyncMock(return_value=mock_client)
+        runner = ScenarioRunner(template_engine, sut_config, client_pool=pool)
         context = {"status": "approved"}  # Not declined
 
         results = []
-        async for result in runner.execute_flow(scenario, context, mock_client):
+        async for result in runner.execute_flow(scenario, context):
             results.append(result)
 
         # Should have branch decision + one action from if_false
@@ -337,11 +340,13 @@ class TestScenarioRunnerBranching:
             ],
         )
 
-        runner = ScenarioRunner(template_engine, sut_config)
+        pool = ClientPool(sut_config)
+        pool.get_http_client = AsyncMock(return_value=mock_client)
+        runner = ScenarioRunner(template_engine, sut_config, client_pool=pool)
         context = {"should_run": False}
 
         results = []
-        async for result in runner.execute_flow(scenario, context, mock_client):
+        async for result in runner.execute_flow(scenario, context):
             results.append(result)
 
         # Should have 3 results
@@ -419,11 +424,13 @@ class TestScenarioRunnerBranching:
             ],
         )
 
-        runner = ScenarioRunner(template_engine, sut_config)
+        pool = ClientPool(sut_config)
+        pool.get_http_client = AsyncMock(return_value=mock_client)
+        runner = ScenarioRunner(template_engine, sut_config, client_pool=pool)
         context: dict = {}
 
         results = []
-        async for result in runner.execute_flow(scenario, context, mock_client):
+        async for result in runner.execute_flow(scenario, context):
             results.append(result)
 
         # get_user + branch decision + update_user

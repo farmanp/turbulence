@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import httpx
 import typer
 from rich.console import Console
 
@@ -19,7 +18,7 @@ from turbulence.config.scenario import (
     Assertion,
     Scenario,
 )
-from turbulence.config.sut import SUTConfig
+from turbulence.engine.client_pool import ClientPool
 from turbulence.engine.context import WorkflowContext
 from turbulence.engine.executor import (
     DEFAULT_PARALLELISM,
@@ -28,14 +27,13 @@ from turbulence.engine.executor import (
 )
 from turbulence.engine.scenario_runner import ScenarioRunner
 from turbulence.engine.template import TemplateEngine
-from turbulence.variation.engine import VariationEngine
 from turbulence.gating import Threshold, ThresholdError
 from turbulence.models.assertion_result import AssertionResult
 from turbulence.models.manifest import RunConfig
-
 from turbulence.models.observation import Observation
 from turbulence.pressure.engine import TurbulenceEngine
 from turbulence.storage.artifact import ArtifactStore
+from turbulence.variation.engine import VariationEngine
 
 console = Console()
 
@@ -192,7 +190,7 @@ async def _run_instances(
 
     if not run_id:
         run_id = generate_run_id()
-    
+
     run_config = RunConfig(seed=seed_value, concurrency=parallelism)
 
     console.print("[bold blue]Turbulence Run[/bold blue]")
@@ -217,6 +215,7 @@ async def _run_instances(
     ).initialize()
 
     template_engine = TemplateEngine()
+    client_pool = ClientPool(sut_config)
     executor = ParallelExecutor(parallelism=parallelism, console=console)
 
     async def execute_instance(instance_index: int) -> InstanceResult:
@@ -260,55 +259,55 @@ async def _run_instances(
         scenario_runner = ScenarioRunner(
             template_engine=template_engine,
             sut_config=instance_sut,
+            client_pool=client_pool,
             turbulence_engine=turbulence_engine,
         )
 
         try:
-            async with httpx.AsyncClient() as client:
-                async for step_index, action, observation, context_dict in scenario_runner.execute_flow(
-                    scenario, context_dict, client
-                ):
-                    artifact_store.write_step(
-                        instance_id=ctx.instance_id,
-                        correlation_id=ctx.correlation_id,
-                        step_index=step_index,
-                        step_name=action.name,
-                        step_type=action.type,
-                        observation=observation,
-                    )
+            async for step_index, action, observation, context_dict in scenario_runner.execute_flow(
+                scenario, context_dict
+            ):
+                artifact_store.write_step(
+                    instance_id=ctx.instance_id,
+                    correlation_id=ctx.correlation_id,
+                    step_index=step_index,
+                    step_name=action.name,
+                    step_type=action.type,
+                    observation=observation,
+                )
 
-                    if isinstance(action, AssertAction):
-                        _write_assertion(
-                            artifact_store,
-                            ctx.instance_id,
-                            ctx.correlation_id,
-                            step_index,
-                            context_dict,
-                        )
-
-                    if not observation.ok:
-                        passed = False
-
-                final_offset = len(scenario.flow)
-                for assertion_index, assertion in enumerate(scenario.assertions):
-                    observation, context_dict = await _execute_assertion(
-                        assertion=assertion,
-                        context=context_dict,
-                        template_engine=template_engine,
-                    )
-
+                if isinstance(action, AssertAction):
                     _write_assertion(
                         artifact_store,
                         ctx.instance_id,
                         ctx.correlation_id,
-                        final_offset + assertion_index,
+                        step_index,
                         context_dict,
                     )
 
-                    if not observation.ok:
-                        passed = False
-                        if scenario.stop_when.any_assertion_fails:
-                            break
+                if not observation.ok:
+                    passed = False
+
+            final_offset = len(scenario.flow)
+            for assertion_index, assertion in enumerate(scenario.assertions):
+                observation, context_dict = await _execute_assertion(
+                    assertion=assertion,
+                    context=context_dict,
+                    template_engine=template_engine,
+                )
+
+                _write_assertion(
+                    artifact_store,
+                    ctx.instance_id,
+                    ctx.correlation_id,
+                    final_offset + assertion_index,
+                    context_dict,
+                )
+
+                if not observation.ok:
+                    passed = False
+                    if scenario.stop_when.any_assertion_fails:
+                        break
         except Exception as exc:
             import traceback
             from logging import getLogger
@@ -345,6 +344,7 @@ async def _run_instances(
     try:
         await executor.execute(instances, execute_instance)
     finally:
+        await client_pool.close_all()
         summary = artifact_store.finalize()
 
     executor.print_summary()
@@ -361,7 +361,7 @@ async def _run_instances(
             else:
                 console.print(f"  [bold red]✗ {msg}[/bold red]")
                 failed_thresholds += 1
-        
+
         if failed_thresholds > 0:
             console.print(f"\n[bold red]Build failed: {failed_thresholds} threshold(s) violated[/bold red]")
             return 2
@@ -398,7 +398,7 @@ async def _execute_assertion(
     action_dict = assert_action.model_dump()
     rendered_dict = template_engine.render_dict(action_dict, context)
     rendered_action = AssertAction(**rendered_dict)
-    
+
     runner = AssertActionRunner(action=rendered_action)
     return await runner.execute(context)
 

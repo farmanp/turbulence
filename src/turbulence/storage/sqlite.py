@@ -2,9 +2,7 @@
 
 import json
 import sqlite3
-from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from turbulence.models.manifest import (
     AssertionRecord,
@@ -216,7 +214,7 @@ class SQLiteStorageWriter:
     def close(self) -> None:
         """Close the database connection."""
         if self._conn:
-            # We don't have a direct finalized RunManifest in initialize, 
+            # We don't have a direct finalized RunManifest in initialize,
             # but we can update completed_at in finalize if we had access to it.
             # For now, just close.
             self._conn.close()

@@ -234,22 +234,35 @@ Execute each batch to completion before starting the next. Within a batch, all t
 
 ---
 
+### Batch 11: Multi-Protocol Foundation
+| Ticket | Title | Dependencies | Estimated Complexity | Status |
+|--------|-------|--------------|---------------------|--------|
+| FEAT-033 | Action Registry Pattern | FEAT-011 | Medium | DONE |
+| FEAT-034 | Observation Model V2 | FEAT-008 | Low | DONE |
+| FEAT-035 | Service Config V2 | FEAT-002 | Medium | DONE |
+| FEAT-036 | gRPC Action Support | FEAT-033, FEAT-034, FEAT-035 | High | DONE |
+| FEAT-037 | ClientPool Connection Manager | FEAT-011 | High | DONE |
+
+**Batch Notes:** This batch lays the foundation for non-HTTP protocol support. FEAT-033, 034, and 035 are foundational changes to the configuration and execution models. FEAT-036 is the first implementation of a non-HTTP protocol (gRPC). Derived from SPIKE-003 multi-protocol transport architecture research.
+
+---
+
 ## Dependency Matrix
 
 | Ticket | Depends On | Blocks |
 |--------|-----------|--------|
 | INFRA-001 | - | FEAT-001, FEAT-002, FEAT-003 |
 | FEAT-001 | INFRA-001 | FEAT-010 |
-| FEAT-002 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, FEAT-031 |
+| FEAT-002 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, FEAT-031, FEAT-035 |
 | FEAT-003 | INFRA-001 | FEAT-004, FEAT-005, FEAT-006, SPIKE-002, FEAT-031 |
 | FEAT-004 | FEAT-002, FEAT-003 | FEAT-007, FEAT-012, FEAT-030 |
 | FEAT-005 | FEAT-002, FEAT-003 | FEAT-007 |
 | FEAT-006 | FEAT-002, FEAT-003 | FEAT-007, FEAT-013, FEAT-014, FEAT-019 |
 | FEAT-007 | FEAT-004, FEAT-005, FEAT-006 | FEAT-008, FEAT-009, FEAT-010, FEAT-017, FEAT-019 |
-| FEAT-008 | FEAT-007 | FEAT-011, FEAT-018, FEAT-021 |
+| FEAT-008 | FEAT-007 | FEAT-011, FEAT-018, FEAT-021, FEAT-034 |
 | FEAT-009 | FEAT-007 | FEAT-015 |
 | FEAT-010 | FEAT-007, FEAT-001 | - |
-| FEAT-011 | FEAT-008 | FEAT-015, FEAT-016 |
+| FEAT-011 | FEAT-008 | FEAT-015, FEAT-016, FEAT-033, FEAT-037 |
 | FEAT-012 | FEAT-004 | - |
 | FEAT-013 | FEAT-006 | - |
 | FEAT-014 | FEAT-006 | - |
@@ -260,7 +273,7 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-019 | FEAT-007, FEAT-006 | SPIKE-001, FEAT-020 |
 | SPIKE-001 | FEAT-017, FEAT-019 | FEAT-020 |
 | SPIKE-002 | FEAT-003 | - |
-| SPIKE-003 | FEAT-007, FEAT-008 | - |
+| SPIKE-003 | FEAT-007, FEAT-008 | FEAT-033, FEAT-034, FEAT-035, FEAT-036 |
 | FEAT-020 | FEAT-018, FEAT-019, SPIKE-001 | FEAT-021 |
 | FEAT-021 | FEAT-008, FEAT-020 | FEAT-022, FEAT-023, FEAT-025, FEAT-027, FEAT-028 |
 | FEAT-022 | FEAT-021 | - |
@@ -274,6 +287,11 @@ Execute each batch to completion before starting the next. Within a batch, all t
 | FEAT-030 | FEAT-004 | - |
 | FEAT-031 | FEAT-002, FEAT-003 | FEAT-032 |
 | FEAT-032 | FEAT-031 | - |
+| FEAT-033 | FEAT-011 | FEAT-036 |
+| FEAT-034 | FEAT-008 | FEAT-036 |
+| FEAT-035 | FEAT-002 | FEAT-036 |
+| FEAT-036 | FEAT-033, FEAT-034, FEAT-035 | - |
+| FEAT-037 | FEAT-011 | - |
 
 ## Critical Path
 
@@ -316,4 +334,4 @@ INFRA-001 → FEAT-002 → FEAT-004 → FEAT-007 → FEAT-008 → FEAT-011 → F
 
 Turbulence core and Web UI foundation are stable. Scenario Visualizer (FEAT-027) implemented.
 Branching flows (FEAT-019) completed with condition evaluation and BranchAction support.
-**Current Frontier:** Advanced Engine (Batch 7: Spikes), Web UI Enhancements (Batch 9: Quick Launcher, Results Explorer).
+**Current Frontier:** Multi-Protocol Foundation (Batch 11), Advanced Engine (Batch 7: Spikes), Web UI Enhancements (Batch 9: Quick Launcher, Results Explorer).

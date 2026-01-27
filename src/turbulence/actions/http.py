@@ -1,6 +1,5 @@
 """HTTP action runner for executing HTTP requests."""
 
-import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -47,12 +46,27 @@ class HttpActionRunner(BaseActionRunner):
     ) -> tuple[Observation, dict[str, Any]]:
         """Execute the HTTP action and return observation with updated context."""
         service = self.sut_config.get_service(self.action.service)
-        base_url = str(service.base_url)
+
+        # Determine protocol configuration
+        base_url = ""
+        service_headers = {}
+        timeout = 30.0
+
+        if service.protocol == "http" and service.http:
+            base_url = str(service.http.base_url)
+            service_headers = service.http.headers
+            timeout = service.http.timeout_seconds
+        else:
+            # Fallback for backward compatibility (properties)
+            base_url = str(service.base_url)
+            service_headers = service.headers
+            timeout = service.timeout_seconds
+
         url = f"{base_url}{self.action.path}"
 
         headers = {
             **self.sut_config.default_headers,
-            **service.headers,
+            **service_headers,
             **self.action.headers,
         }
 
@@ -61,7 +75,7 @@ class HttpActionRunner(BaseActionRunner):
             "url": url,
             "headers": headers,
             "params": self.action.query if self.action.query else None,
-            "timeout": service.timeout_seconds,
+            "timeout": timeout,
         }
 
         if self.action.body is not None:
@@ -157,7 +171,7 @@ class HttpActionRunner(BaseActionRunner):
         if observation.ok and observation.body and self.action.extract:
             extracted = extract_values(observation.body, self.action.extract)
             updated_context.update(extracted)
-            
+
             # Check for missing extractions to report as errors
             for key in self.action.extract:
                 if key not in extracted:
@@ -168,17 +182,17 @@ class HttpActionRunner(BaseActionRunner):
     async def _execute_single_request(self, request_kwargs: dict[str, Any]) -> Observation:
         """Execute a single HTTP request and return an Observation."""
         start_time = time.perf_counter()
-        
+
         try:
             if self._client is not None:
                 response = await self._client.request(**request_kwargs)
             else:
                 async with httpx.AsyncClient() as client:
                     response = await client.request(**request_kwargs)
-            
+
             status_code = response.status_code
             headers = dict(response.headers)
-            
+
             try:
                 body = response.json()
             except Exception:

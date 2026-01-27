@@ -9,7 +9,6 @@ import httpx
 import pytest
 from typer.testing import CliRunner
 
-from turbulence.config.scenario import HttpAction
 from turbulence.config.sut import Service, SUTConfig
 from turbulence.engine.replay import (
     InstanceData,

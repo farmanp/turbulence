@@ -84,10 +84,10 @@ def migrate(
 
     # Migrate instances
     migrate_file("instances.jsonl", InstanceRecord, storage.write_instance, "[green]Migrating instances")
-    
+
     # Migrate steps
     migrate_file("steps.jsonl", StepRecord, storage.write_step, "[cyan]Migrating steps")
-    
+
     # Migrate assertions
     migrate_file("assertions.jsonl", AssertionRecord, storage.write_assertion, "[magenta]Migrating assertions")
 

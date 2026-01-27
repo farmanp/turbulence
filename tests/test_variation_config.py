@@ -1,12 +1,14 @@
 import pytest
 from pydantic import ValidationError
+
 from turbulence.variation.config import (
-    VariationConfig, 
-    ParameterVariation, 
-    VariationType, 
+    ParameterVariation,
+    TimingConfig,
     ToggleVariation,
-    TimingConfig
+    VariationConfig,
+    VariationType,
 )
+
 
 def test_parameter_variation_choice():
     config = ParameterVariation(type=VariationType.CHOICE, values=[1, 2, 3])

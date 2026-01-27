@@ -32,7 +32,7 @@ def profiles(
         raise typer.Exit(code=1)
 
     console.print(f"[bold]Available profiles for '{config.name}':[/bold]")
-    
+
     if not config.profiles:
         console.print("  [yellow]No profiles defined.[/yellow]")
         return

@@ -6,9 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from turbulence.api.routes.configs import router as configs_router
 from turbulence.api.routes.runs import router as runs_router
 from turbulence.api.routes.stream import router as stream_router
-from turbulence.api.routes.configs import router as configs_router
 
 
 def create_app(

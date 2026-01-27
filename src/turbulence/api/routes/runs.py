@@ -37,9 +37,9 @@ def list_runs(
     """
     reader = get_reader(request)
     runs = reader.list_runs(
-        limit=limit, 
-        query=query, 
-        status=status, 
+        limit=limit,
+        query=query,
+        status=status,
         slow_threshold=slow_threshold
     )
     return {"runs": [asdict(run) for run in runs]}

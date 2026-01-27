@@ -111,13 +111,28 @@ class WaitActionRunner(BaseActionRunner):
             A tuple of (WaitObservation, updated_context).
         """
         service = self.sut_config.get_service(self.action.service)
-        base_url = str(service.base_url)
+
+        # Determine protocol configuration
+        base_url = ""
+        service_headers = {}
+        timeout = 30.0
+
+        if service.protocol == "http" and service.http:
+            base_url = str(service.http.base_url)
+            service_headers = service.http.headers
+            timeout = service.http.timeout_seconds
+        else:
+            # Fallback for backward compatibility (properties)
+            base_url = str(service.base_url)
+            service_headers = service.headers
+            timeout = service.timeout_seconds
+
         url = f"{base_url}{self.action.path}"
 
         # Merge headers: default -> service
         headers = {
             **self.sut_config.default_headers,
-            **service.headers,
+            **service_headers,
         }
 
         # Build request kwargs
@@ -125,7 +140,7 @@ class WaitActionRunner(BaseActionRunner):
             "method": self.action.method.upper(),
             "url": url,
             "headers": headers,
-            "timeout": min(service.timeout_seconds, self.action.timeout_seconds),
+            "timeout": min(timeout, self.action.timeout_seconds),
         }
 
         start_time = time.perf_counter()

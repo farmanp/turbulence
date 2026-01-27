@@ -2,7 +2,7 @@
 
 import json
 import math
-from collections import Counter, defaultdict
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -93,7 +93,7 @@ class ScenarioStats:
         if self.total == 0:
             return 0.0
         return (self.pass_count / self.total) * 100
-    
+
     @property
     def actions_list(self) -> list[ActionStats]:
         """Return actions sorted by name? Or just list."""
@@ -144,7 +144,7 @@ class ReportData:
     def services_by_failure_count(self) -> list[tuple[str, int]]:
         """Return services sorted by failure count (most failures first)."""
         return self.failures_by_service.most_common()
-    
+
     @property
     def services_stats_list(self) -> list[ServiceStats]:
         """Return service stats sorted by request count."""
@@ -224,7 +224,7 @@ class HTMLReportGenerator:
 
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
-        
+
         try:
             # Load instances
             instances = []
@@ -307,7 +307,7 @@ class HTMLReportGenerator:
             else:
                 report_data.fail_count += 1
                 report_data.scenarios[scenario].fail_count += 1
-            
+
             # Error categorization from instance-level errors
             if not passed and instance.get("error"):
                 error_msg = instance["error"]
@@ -321,17 +321,17 @@ class HTMLReportGenerator:
             scenario = instance_scenario_map.get(instance_id, "unknown")
             if scenario not in report_data.scenarios:
                 report_data.scenarios[scenario] = ScenarioStats(name=scenario)
-            
+
             step_name = step.get("step_name", "unknown")
             obs = step.get("observation", {})
             latency = obs.get("latency_ms", 0.0)
             service = obs.get("service")
-            
+
             # Update ActionStats
             scenario_stats = report_data.scenarios[scenario]
             if step_name not in scenario_stats.actions:
                 scenario_stats.actions[step_name] = ActionStats(name=step_name)
-            
+
             action_stats = scenario_stats.actions[step_name]
             action_stats.count += 1
             action_stats.latencies.append(latency)
@@ -346,7 +346,7 @@ class HTMLReportGenerator:
             if service:
                 if service not in report_data.services:
                     report_data.services[service] = ServiceStats(name=service)
-                
+
                 service_stats = report_data.services[service]
                 service_stats.request_count += 1
                 service_stats.latencies.append(latency)
@@ -360,10 +360,10 @@ class HTMLReportGenerator:
                 # assertions.jsonl doesn't have 'service', it relies on implicit knowledge or manual mapping?
                 # The existing code tried to get 'service' from assertion dict.
                 # If we want service failures from assertions, we need 'service' in assertion record.
-                # Since we can't easily add it now without changing AssertAction execution, 
+                # Since we can't easily add it now without changing AssertAction execution,
                 # we'll stick to what we have or just use step failures for service stats.
                 # report_data.failures_by_service[service] += 1  <-- Removing this as it's unreliable from assertions
-                
+
                 report_data.failing_assertions[name] += 1
 
         # Fill failures_by_service from ServiceStats instead

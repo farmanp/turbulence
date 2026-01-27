@@ -102,9 +102,9 @@ class ArtifactReaderService:
         self.runs_dir = runs_dir
 
     def list_runs(
-        self, 
-        limit: int = 50, 
-        query: str | None = None, 
+        self,
+        limit: int = 50,
+        query: str | None = None,
         status: str | None = None,
         slow_threshold: float | None = None
     ) -> list[RunSummary]:
@@ -134,23 +134,23 @@ class ArtifactReaderService:
 
             try:
                 summary = self._read_run_summary(run_path)
-                
+
                 # Apply filters
                 if query:
                     q = query.lower()
                     matches = (
-                        q in summary.id.lower() or 
-                        q in summary.sut_name.lower() or 
+                        q in summary.id.lower() or
+                        q in summary.sut_name.lower() or
                         any(q in s.lower() for s in summary.scenarios)
                     )
                     if not matches:
                         continue
-                
+
                 if status == "passed" and summary.stats.failed > 0:
                     continue
                 if status == "failed" and summary.stats.failed == 0:
                     continue
-                
+
                 if slow_threshold is not None and summary.stats.p95_latency_ms <= slow_threshold:
                     continue
 

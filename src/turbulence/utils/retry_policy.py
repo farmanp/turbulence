@@ -3,8 +3,9 @@
 import asyncio
 import logging
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Literal, TypeVar
+from typing import Literal, TypeVar
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -55,13 +56,13 @@ async def with_retry(
     """
     last_exception: Exception | None = None
     last_result: T | None = None
-    
+
     for attempt in range(1, config.max_attempts + 1):
         start_time = time.perf_counter()
         try:
             result = await func()
             duration_ms = (time.perf_counter() - start_time) * 1000
-            
+
             if on_attempt:
                 on_attempt(attempt, result, None, duration_ms)
 
@@ -75,7 +76,7 @@ async def with_retry(
         except Exception as e:
             duration_ms = (time.perf_counter() - start_time) * 1000
             last_exception = e
-            
+
             if on_attempt:
                 on_attempt(attempt, None, e, duration_ms)
 
@@ -84,7 +85,7 @@ async def with_retry(
 
             # If it's a retryable exception, we clear the last result if any
             last_result = None
-            
+
             # Calculate delay
             delay = _calculate_delay(config, attempt)
             logger.debug(
@@ -104,7 +105,7 @@ async def with_retry(
 
     if last_exception:
         raise last_exception
-    
+
     return last_result  # type: ignore
 
 

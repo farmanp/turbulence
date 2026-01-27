@@ -1,12 +1,19 @@
 """SUT (System Under Test) configuration models."""
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+    model_validator,
+)
 
 
-class Service(BaseModel):
-    """Configuration for a single service in the system under test."""
+class HttpServiceConfig(BaseModel):
+    """Configuration for HTTP specific service settings."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -16,11 +23,11 @@ class Service(BaseModel):
     )
     headers: dict[str, str] = Field(
         default_factory=dict,
-        description="Service-specific headers (override default_headers)",
+        description="Service-specific headers",
     )
     timeout_seconds: float = Field(
         default=30.0,
-        description="Default timeout for requests to this service",
+        description="Request timeout in seconds",
         gt=0,
     )
 
@@ -30,11 +37,43 @@ class Service(BaseModel):
         """Ensure base_url doesn't have trailing slash."""
         if isinstance(v, str):
             return v.rstrip("/")
+        if hasattr(v, "unicode_string"):
+            return v.unicode_string().rstrip("/")
         return v
 
 
-class ProfileService(BaseModel):
-    """Service configuration overrides for a profile."""
+class GrpcServiceConfig(BaseModel):
+    """Configuration for gRPC specific service settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    host: str = Field(..., description="Service host")
+    port: int = Field(..., description="Service port", gt=0, lt=65536)
+    use_tls: bool = Field(default=False, description="Whether to use TLS/SSL")
+    proto_path: str | None = Field(
+        default=None,
+        description="Path to .proto file or directory containing protos",
+    )
+    timeout_seconds: float = Field(
+        default=30.0, description="Request timeout", gt=0
+    )
+
+
+class KafkaServiceConfig(BaseModel):
+    """Configuration for Kafka specific service settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    bootstrap_servers: list[str] = Field(
+        ..., description="List of bootstrap server addresses"
+    )
+    timeout_seconds: float = Field(
+        default=30.0, description="Connection timeout", gt=0
+    )
+
+
+class ProfileHttpServiceConfig(BaseModel):
+    """Configuration overrides for HTTP specific service settings."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -44,11 +83,11 @@ class ProfileService(BaseModel):
     )
     headers: dict[str, str] | None = Field(
         default=None,
-        description="Override/merge headers",
+        description="Override headers",
     )
     timeout_seconds: float | None = Field(
         default=None,
-        description="Override timeout",
+        description="Override timeout in seconds",
         gt=0,
     )
 
@@ -56,9 +95,199 @@ class ProfileService(BaseModel):
     @classmethod
     def validate_base_url(cls, v: Any) -> Any:
         """Ensure base_url doesn't have trailing slash."""
+        if v is None:
+            return v
         if isinstance(v, str):
             return v.rstrip("/")
+        if hasattr(v, "unicode_string"):
+            return v.unicode_string().rstrip("/")
         return v
+
+
+class ProfileGrpcServiceConfig(BaseModel):
+    """Configuration overrides for gRPC specific service settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    host: str | None = Field(default=None, description="Override host")
+    port: int | None = Field(default=None, description="Override port", gt=0, lt=65536)
+    use_tls: bool | None = Field(default=None, description="Override TLS usage")
+    proto_path: str | None = Field(default=None, description="Override proto path")
+    timeout_seconds: float | None = Field(
+        default=None, description="Override timeout", gt=0
+    )
+
+
+class ProfileKafkaServiceConfig(BaseModel):
+    """Configuration overrides for Kafka specific service settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    bootstrap_servers: list[str] | None = Field(
+        default=None, description="Override bootstrap servers"
+    )
+    timeout_seconds: float | None = Field(
+        default=None, description="Override timeout", gt=0
+    )
+
+
+class Service(BaseModel):
+    """Configuration for a single service in the system under test."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    protocol: Literal["http", "grpc", "kafka"] = Field(
+        default="http",
+        description="Protocol used by the service",
+    )
+    http: HttpServiceConfig | None = Field(
+        default=None,
+        description="HTTP-specific configuration",
+    )
+    grpc: GrpcServiceConfig | None = Field(
+        default=None,
+        description="gRPC-specific configuration",
+    )
+    kafka: KafkaServiceConfig | None = Field(
+        default=None,
+        description="Kafka-specific configuration",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy(cls, data: Any) -> Any:
+        """Migrate legacy top-level fields to explicit protocol blocks."""
+        if not isinstance(data, dict):
+            return data
+
+        legacy_fields = ["base_url", "headers", "timeout_seconds"]
+        has_legacy = any(k in data for k in legacy_fields)
+
+        # If has legacy fields and no protocol, default to http
+        if has_legacy and "protocol" not in data:
+            data["protocol"] = "http"
+
+        # If data is purely legacy (has base_url) and no protocol, default to http
+        # (Already handled by has_legacy above, but keeping logic clear)
+
+        # If protocol is http and we have legacy fields, move them to 'http' block
+        if data.get("protocol", "http") == "http" and "http" not in data:
+            http_data = {k: data.pop(k) for k in legacy_fields if k in data}
+            if http_data:
+                data["http"] = http_data
+
+        return data
+
+    @model_validator(mode="after")
+    def validate_protocol_config(self) -> "Service":
+        """Ensure the chosen protocol has its corresponding config block."""
+        if self.protocol == "http" and not self.http:
+            raise ValueError(
+                "HTTP service configuration ('http' block or legacy fields) "
+                "is required for protocol 'http'"
+            )
+        if self.protocol == "grpc" and not self.grpc:
+            raise ValueError(
+                "gRPC service configuration ('grpc' block) is required for protocol 'grpc'"
+            )
+        if self.protocol == "kafka" and not self.kafka:
+            raise ValueError(
+                "Kafka service configuration ('kafka' block) is required for protocol 'kafka'"
+            )
+        return self
+
+    @property
+    def base_url(self) -> HttpUrl:
+        """Helper for HTTP actions (backward compatibility)."""
+        if self.http:
+            return self.http.base_url
+        raise AttributeError(f"Service '{self.protocol}' doesn't have a base_url")
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Helper for HTTP actions (backward compatibility)."""
+        if self.http:
+            return self.http.headers
+        return {}
+
+    @property
+    def timeout_seconds(self) -> float:
+        """Helper for backward compatibility."""
+        if self.http:
+            return self.http.timeout_seconds
+        if self.grpc:
+            return self.grpc.timeout_seconds
+        if self.kafka:
+            return self.kafka.timeout_seconds
+        return 30.0
+
+
+class ProfileService(BaseModel):
+    """Service configuration overrides for a profile."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    protocol: Literal["http", "grpc", "kafka"] | None = Field(
+        default=None,
+        description="Override protocol",
+    )
+    http: ProfileHttpServiceConfig | None = Field(
+        default=None,
+        description="Override HTTP config",
+    )
+    grpc: ProfileGrpcServiceConfig | None = Field(
+        default=None,
+        description="Override gRPC config",
+    )
+    kafka: ProfileKafkaServiceConfig | None = Field(
+        default=None,
+        description="Override Kafka config",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy(cls, data: Any) -> Any:
+        """Migrate legacy top-level fields in profile overrides."""
+        if not isinstance(data, dict):
+            return data
+
+        legacy_fields = ["base_url", "headers", "timeout_seconds"]
+        has_legacy = any(k in data for k in legacy_fields)
+
+        # If has legacy fields and no protocol/http, assume http override
+        if has_legacy and "http" not in data:
+            http_data = {k: data.pop(k) for k in legacy_fields if k in data}
+            if http_data:
+                data["http"] = http_data
+                if "protocol" not in data:
+                    data["protocol"] = "http"
+
+        return data
+
+    @property
+    def base_url(self) -> HttpUrl | None:
+        """Helper for HTTP actions (backward compatibility)."""
+        if self.http:
+            return self.http.base_url
+        return None
+
+    @property
+    def headers(self) -> dict[str, str] | None:
+        """Helper for HTTP actions (backward compatibility)."""
+        if self.http:
+            return self.http.headers
+        return None
+
+    @property
+    def timeout_seconds(self) -> float | None:
+        """Helper for backward compatibility."""
+        if self.http and self.http.timeout_seconds:
+            return self.http.timeout_seconds
+        if self.grpc and self.grpc.timeout_seconds:
+            return self.grpc.timeout_seconds
+        if self.kafka and self.kafka.timeout_seconds:
+            return self.kafka.timeout_seconds
+        return None
 
 
 class Profile(BaseModel):
@@ -135,4 +364,7 @@ class SUTConfig(BaseModel):
             Merged headers dictionary
         """
         service = self.get_service(service_name)
-        return {**self.default_headers, **service.headers}
+        service_headers = {}
+        if service.protocol == "http" and service.http:
+            service_headers = service.http.headers
+        return {**self.default_headers, **service_headers}

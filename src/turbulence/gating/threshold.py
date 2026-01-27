@@ -95,7 +95,7 @@ class Threshold:
         """
         attr_name = SUPPORTED_METRICS[self.metric]
         actual = getattr(summary, attr_name)
-        
+
         # Special handling for pass_rate if threshold is <= 1.0 (assume ratio)
         threshold_val = self.value
         if self.metric == "pass_rate" and threshold_val <= 1.0 and actual > 1.0:
@@ -116,5 +116,5 @@ class Threshold:
         message = (
             f"Threshold {status}: {self.metric} ({actual:.2f}) {self.operator} {threshold_val}"
         )
-        
+
         return passed, actual, message

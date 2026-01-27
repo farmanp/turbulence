@@ -23,7 +23,7 @@ def extract_values(
         A dictionary containing the extracted values.
     """
     extracted = {}
-    
+
     if not data or not isinstance(data, (dict, list)):
         return extracted
 
@@ -31,7 +31,7 @@ def extract_values(
         try:
             jsonpath_expr = parse(jpath_expr)
             matches = jsonpath_expr.find(data)
-            
+
             if matches:
                 # If multiple matches, take the first one (standard behavior for Turbulence)
                 extracted[var_name] = matches[0].value

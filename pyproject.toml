@@ -30,6 +30,10 @@ dependencies = [
     "jsonschema>=4.20.0",
     "fastapi>=0.109.0",
     "uvicorn>=0.27.0",
+    "grpcio>=1.60.0",
+    "grpcio-reflection>=1.60.0",
+    "grpcio-tools>=1.60.0",
+    "protobuf>=4.25.0",
 ]
 
 [project.optional-dependencies]
@@ -40,6 +44,7 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.5.0",
     "pre-commit>=3.5.0",
+    "types-protobuf>=4.24.0",
 ]
 
 [project.scripts]

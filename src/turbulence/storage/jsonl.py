@@ -6,7 +6,6 @@ from typing import IO, Any
 
 from pydantic import BaseModel
 
-
 from turbulence.models.manifest import (
     AssertionRecord,
     InstanceRecord,

@@ -77,6 +77,6 @@ class TestThresholdEvaluation:
     def test_equality_operators(self, summary):
         t1 = Threshold.parse("error_count<=0")
         assert t1.evaluate(summary)[0]
-        
+
         t2 = Threshold.parse("error_count>=0")
         assert t2.evaluate(summary)[0]

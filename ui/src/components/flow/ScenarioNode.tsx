@@ -56,7 +56,7 @@ const actionConfig: Record<string, { bg: string; border: string; text: string; g
         glow: 'shadow-[0_0_15px_rgba(168,85,247,0.2)]',
         icon: (
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h8a2 2 0 012 2v9m-10 3H4a2 2 0 01-2-2V5a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M8 7V5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8 10-8 10-8-10 8-10z" />
             </svg>
         ),
     },
@@ -67,8 +67,22 @@ interface ScenarioNodeProps {
     selected?: boolean;
 }
 
+function getTooltip(step: ScenarioStep, label: string): string {
+    const parts = [`Step: ${label}`, `Type: ${step.type.toUpperCase()}`];
+    if (step.type === 'http') {
+        parts.push(`${step.method || 'GET'} ${step.path || '/'}`);
+    } else if (step.type === 'wait') {
+        parts.push(`Timeout: ${step.timeout_seconds || 30}s`);
+    } else if (step.type === 'assert') {
+        if (step.expect?.status_code) parts.push(`Status: ${step.expect.status_code}`);
+    }
+    parts.push('Click to view details');
+    return parts.join('\n');
+}
+
 function ScenarioNodeComponent({ data, selected }: ScenarioNodeProps) {
     const config = actionConfig[data.step.type] || actionConfig.http;
+    const tooltip = getTooltip(data.step, data.label);
 
     return (
         <>
@@ -79,8 +93,9 @@ function ScenarioNodeComponent({ data, selected }: ScenarioNodeProps) {
             />
 
             <div
+                title={tooltip}
                 className={`
-                    min-w-[200px] max-w-[280px] px-4 py-3 rounded-xl
+                    w-[260px] px-4 py-3 rounded-xl
                     ${config.bg} ${config.border} border
                     backdrop-blur-sm transition-all duration-300
                     ${selected ? `${config.glow} ring-2 ring-white/20` : ''}

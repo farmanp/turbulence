@@ -1,12 +1,10 @@
 """Tests for SUT configuration profiles."""
 
-from pathlib import Path
 
 import pytest
 import yaml
 
 from turbulence.config.loader import ConfigLoadError, load_sut
-from turbulence.config.sut import SUTConfig
 
 
 @pytest.fixture
@@ -69,15 +67,15 @@ def test_load_default_profile(sut_with_profiles):
 def test_load_specific_profile(sut_with_profiles):
     """Test loading a specific profile by name."""
     config = load_sut(sut_with_profiles, profile="prod")
-    
+
     # Check overrides
     assert str(config.services["api"].base_url).rstrip("/") == "http://prod.api"
     assert config.services["api"].timeout_seconds == 10.0
-    
+
     # Check header merging
     assert config.default_headers["X-Common"] == "common"
     assert config.default_headers["X-Env"] == "prod"
-    
+
     # Check service specific header merge
     assert config.services["db"].headers["X-Secret"] == "123"
 
@@ -98,7 +96,7 @@ def test_backward_compatibility(tmp_path):
         "services": {"api": {"base_url": "http://api.com"}}
     }
     sut_path.write_text(yaml.dump(sut_content))
-    
+
     config = load_sut(sut_path)
     assert config.name == "Old SUT"
     assert config.profiles == {}

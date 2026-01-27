@@ -16,7 +16,7 @@ class Expectation(BaseModel):
 
     status_code: int | None = Field(
         default=None,
-        description="Expected HTTP status code",
+        description="Expected status code (HTTP 200+, gRPC 0+)",
     )
     jsonpath: str | None = Field(
         default=None,
@@ -172,6 +172,41 @@ class AssertAction(BaseModel):
     )
 
 
+class GrpcAction(BaseModel):
+    """gRPC action configuration for making unary calls."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    name: str = Field(..., description="Unique name for this action")
+    type: Literal["grpc"] = Field("grpc", description="Action type discriminator")
+    service: str = Field(..., description="Target service name from SUT config")
+    method: str = Field(
+        ...,
+        description="gRPC method (e.g., UserService/GetUser or package.Service/Method)",
+    )
+    body: dict[str, Any] = Field(
+        default_factory=dict,
+        alias="message",
+        description="gRPC request message (can use {{templates}})",
+    )
+    metadata: dict[str, str] = Field(
+        default_factory=dict,
+        description="gRPC metadata (headers)",
+    )
+    extract: dict[str, str] = Field(
+        default_factory=dict,
+        description="Values to extract from response message using JSONPath",
+    )
+    retry: RetryConfig | None = Field(
+        default=None,
+        description="Retry policy for this action",
+    )
+    condition: str | None = Field(
+        default=None,
+        description="Skip this step if condition evaluates to false",
+    )
+
+
 class BranchAction(BaseModel):
     """Branch action for conditional flow execution.
 
@@ -199,7 +234,7 @@ class BranchAction(BaseModel):
 
 # Discriminated union for action types
 Action = Annotated[
-    HttpAction | WaitAction | AssertAction | BranchAction,
+    HttpAction | WaitAction | AssertAction | GrpcAction | BranchAction,
     Field(discriminator="type"),
 ]
 
