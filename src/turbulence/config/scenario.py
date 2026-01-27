@@ -220,7 +220,9 @@ class BranchAction(BaseModel):
     type: Literal["branch"] = Field("branch", description="Action type discriminator")
     condition: str = Field(
         ...,
-        description="Expression to evaluate (supports {{templates}} and Python expressions)",
+        description=(
+            "Expression to evaluate (supports {{templates}} and Python expressions)"
+        ),
     )
     if_true: list["Action"] = Field(
         default_factory=list,
@@ -232,9 +234,40 @@ class BranchAction(BaseModel):
     )
 
 
+class DecideAction(BaseModel):
+    """Decide action for policy-based weighted random selection.
+
+    Uses pre-generated policies to make reproducible, weighted random
+    decisions that influence workflow branching.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., description="Unique name for this decision")
+    type: Literal["decide"] = Field("decide", description="Action type discriminator")
+    decision: str = Field(
+        ...,
+        description="Name of the decision point in the policy (e.g., 'product_browse')",
+    )
+    output_var: str = Field(
+        default="decision_result",
+        description="Context variable to store the decision result",
+    )
+    policy_ref: str | None = Field(
+        default=None,
+        description=(
+            "Reference to specific policy by persona_id (uses default if not set)"
+        ),
+    )
+    condition: str | None = Field(
+        default=None,
+        description="Skip this step if condition evaluates to false",
+    )
+
+
 # Discriminated union for action types
 Action = Annotated[
-    HttpAction | WaitAction | AssertAction | GrpcAction | BranchAction,
+    HttpAction | WaitAction | AssertAction | GrpcAction | BranchAction | DecideAction,
     Field(discriminator="type"),
 ]
 

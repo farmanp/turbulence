@@ -3,7 +3,16 @@
 import typer
 
 from turbulence import __version__
-from turbulence.commands import migrate, profiles, replay, report, run, serve
+from turbulence.commands import (
+    analyze,
+    generate,
+    migrate,
+    profiles,
+    replay,
+    report,
+    run,
+    serve,
+)
 
 app = typer.Typer(
     name="turbulence",
@@ -19,6 +28,8 @@ app.command(name="replay", help="Replay a specific workflow instance")(replay)
 app.command(name="profiles", help="List available environment profiles")(profiles)
 app.command(name="serve", help="Serve the Web UI dashboard")(serve)
 app.command(name="migrate", help="Migrate JSONL artifacts to SQLite")(migrate)
+app.command(name="generate", help="Generate behavior policies from personas")(generate)
+app.command(name="analyze", help="Analyze test run results with AI")(analyze)
 
 
 @app.callback(invoke_without_command=True)
