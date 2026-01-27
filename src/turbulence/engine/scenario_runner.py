@@ -10,10 +10,12 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 from turbulence.actions import ActionRunnerFactory
+from turbulence.actors.policy import Policy
 from turbulence.config.scenario import (
     Action,
     AssertAction,
     BranchAction,
+    DecideAction,
     HttpAction,
     Scenario,
     WaitAction,
@@ -42,6 +44,8 @@ class ScenarioRunner:
         sut_config: SUTConfig,
         client_pool: ClientPool,
         turbulence_engine: TurbulenceEngine | None = None,
+        policies: dict[str, Policy] | None = None,
+        seed: int | None = None,
     ) -> None:
         """Initialize the scenario runner.
 
@@ -50,11 +54,15 @@ class ScenarioRunner:
             sut_config: System under test configuration
             client_pool: Pool for managing connection lifecycles
             turbulence_engine: Optional engine for fault injection
+            policies: Optional dict mapping persona_id to Policy for decide actions
+            seed: Optional seed for reproducible decide action randomness
         """
         self.template_engine = template_engine
         self.sut_config = sut_config
         self.client_pool = client_pool
         self.turbulence_engine = turbulence_engine
+        self.policies = policies or {}
+        self.seed = seed
         self.condition_evaluator = ConditionEvaluator(template_engine)
 
     async def execute_flow(
@@ -259,11 +267,24 @@ class ScenarioRunner:
 
         # Execute based on action type via Factory
         try:
+            # For decide actions, resolve policy and pass seed
+            extra_kwargs: dict[str, Any] = {}
+            if isinstance(rendered_action, DecideAction):
+                # Look up policy by policy_ref or use first available
+                policy_ref = rendered_action.policy_ref
+                if policy_ref and policy_ref in self.policies:
+                    extra_kwargs["policy"] = self.policies[policy_ref]
+                elif self.policies:
+                    # Use first policy if no specific ref
+                    extra_kwargs["policy"] = next(iter(self.policies.values()))
+                extra_kwargs["seed"] = self.seed
+
             runner = ActionRunnerFactory.create(
                 action=rendered_action,
                 sut_config=self.sut_config,
                 client=client,
                 channel=channel,
+                **extra_kwargs,
             )
         except ValueError as e:
             raise ValueError(f"Unknown action type: {type(action)}. {e}")
@@ -311,6 +332,8 @@ class ScenarioRunner:
             return AssertAction(**rendered_dict)
         if isinstance(action, BranchAction):
             return BranchAction(**rendered_dict)
+        if isinstance(action, DecideAction):
+            return DecideAction(**rendered_dict)
 
         raise ValueError(f"Unknown action type for rendering: {type(action)}")
 

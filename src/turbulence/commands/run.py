@@ -11,7 +11,10 @@ from typing import Any
 import typer
 from rich.console import Console
 
+import yaml
+
 from turbulence.actions.assert_ import AssertActionRunner
+from turbulence.actors.policy import Policy, PolicyConfig
 from turbulence.config.loader import load_scenario, load_scenarios, load_sut
 from turbulence.config.scenario import (
     AssertAction,
@@ -126,6 +129,15 @@ def run(
         "--storage",
         help="Storage backend to use for artifacts ('jsonl' or 'sqlite')",
     ),
+    policies: Path | None = typer.Option(
+        None,
+        "--policies",
+        help="Path to policies.yaml for LLM-driven decide actions",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        resolve_path=True,
+    ),
 ) -> None:
     """Execute workflow simulations against the system under test.
 
@@ -147,6 +159,7 @@ def run(
             output_dir=output_dir,
             fail_on=fail_on,
             storage=storage,
+            policies_path=policies,
         )
     )
     raise typer.Exit(code=exit_code)
@@ -166,6 +179,7 @@ async def _run_instances(
     fail_on: list[str] | None,
     storage: str = "jsonl",
     run_id: str | None = None,
+    policies_path: Path | None = None,
 ) -> int:
     # Parse thresholds early to fail fast
     thresholds: list[Threshold] = []
@@ -188,6 +202,18 @@ async def _run_instances(
     sut_config = load_sut(sut, profile=profile)
     seed_value = seed if seed is not None else random.SystemRandom().randint(1, 2**31)
 
+    # Load policies for LLM-driven decide actions
+    policies_dict: dict[str, Policy] = {}
+    if policies_path:
+        with open(policies_path) as f:
+            raw_policies = yaml.safe_load(f)
+        try:
+            policy_config = PolicyConfig(**raw_policies)
+            policies_dict = {p.persona_id: p for p in policy_config.policies}
+        except Exception as e:
+            console.print(f"[bold red]Error loading policies:[/bold red] {e}")
+            return 1
+
     if not run_id:
         run_id = generate_run_id()
 
@@ -202,6 +228,8 @@ async def _run_instances(
     console.print(f"  Parallelism: {parallelism}")
     console.print(f"  Seed: {seed_value}")
     console.print(f"  Output: {output_dir}")
+    if policies_dict:
+        console.print(f"  Policies: {len(policies_dict)} personas ({', '.join(policies_dict.keys())})")
     console.print()
 
     artifact_store = ArtifactStore(
@@ -261,6 +289,8 @@ async def _run_instances(
             sut_config=instance_sut,
             client_pool=client_pool,
             turbulence_engine=turbulence_engine,
+            policies=policies_dict,
+            seed=seed_value + instance_index,  # Unique seed per instance
         )
 
         try:
